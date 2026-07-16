@@ -365,6 +365,7 @@ export default function AdminEditor({
       {error ? <p className="mb-3 text-sm text-match">{error}</p> : null}
 
       <DndContext
+        id="admin-editor-dnd"
         sensors={sensors}
         collisionDetection={collisionDetection}
         onDragStart={handleDragStart}
