@@ -12,6 +12,7 @@ import type {
   CategoryVisibility,
   DecoratedApp,
 } from '#/lib/types'
+import { ToggleGroup, ToggleGroupItem } from '#/components/ui/toggle-group'
 import FeatherIcon from '../FeatherIcon'
 import SortableAppRow from './SortableAppRow'
 
@@ -45,10 +46,12 @@ export default function SortableCategory({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: category.id, data: { type: 'category' } })
   const [name, setName] = useState(category.name)
+  const [visibility, setVisibility] = useState(category.visibility)
   const [adding, setAdding] = useState(false)
   const [appForm, setAppForm] = useState<AppFormValues>(emptyApp)
 
   useEffect(() => setName(category.name), [category.name])
+  useEffect(() => setVisibility(category.visibility), [category.visibility])
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -59,6 +62,16 @@ export default function SortableCategory({
     const next = name.trim()
     if (next && next !== category.name) onRename(category, next)
     else setName(category.name)
+  }
+
+  async function commitVisibility(values: string[]) {
+    const next = values[0]
+    if ((next !== 'public' && next !== 'auth') || next === visibility) return
+
+    const previous = visibility
+    setVisibility(next)
+    const ok = await onVisibility(category, next)
+    if (!ok) setVisibility(previous)
   }
 
   async function addApp() {
@@ -106,22 +119,20 @@ export default function SortableCategory({
             }
           }}
           aria-label="Category name"
-          className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm font-semibold tracking-wide text-foreground uppercase outline-none hover:border-border focus:border-primary"
+          className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm font-semibold tracking-wide text-foreground outline-none hover:border-border focus:border-primary"
         />
-        <select
-          value={category.visibility}
-          onChange={(e) =>
-            onVisibility(category, e.target.value as CategoryVisibility)
-          }
+        <ToggleGroup
+          value={[visibility]}
+          onValueChange={(values) => void commitVisibility(values)}
+          variant="outline"
+          size="sm"
+          spacing={0}
           aria-label="Visibility"
-          className="shrink-0 rounded-md border border-border bg-card px-2 py-1 text-xs text-muted-foreground outline-none focus:border-primary"
+          className="shrink-0"
         >
-          <option value="public">public</option>
-          <option value="auth">private</option>
-        </select>
-        <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
-          {category.apps.length}
-        </span>
+          <ToggleGroupItem value="public">public</ToggleGroupItem>
+          <ToggleGroupItem value="auth">private</ToggleGroupItem>
+        </ToggleGroup>
         <button
           type="button"
           onClick={() => onDelete(category)}
