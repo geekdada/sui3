@@ -1,0 +1,157 @@
+import { createServerFn } from '@tanstack/react-start'
+import { z } from 'zod'
+import {
+  createApp,
+  createCategory,
+  deleteApp,
+  deleteCategory,
+  importSui2Apps,
+  listCategoriesWithApps,
+  reorderLayout,
+  updateApp,
+  updateCategory,
+} from '#/lib/apps'
+import { requireAuthMiddleware } from '#/lib/auth-middleware'
+import { domainFromUrl, getAppIconSvg } from '#/lib/icons'
+import { getSession } from '#/lib/session'
+import type { AppItem, DecoratedApp } from '#/lib/types'
+
+/** Attach the rendered icon SVG and display domain to a raw app row. */
+function decorateApp(app: AppItem): DecoratedApp {
+  return {
+    ...app,
+    iconSvg: getAppIconSvg(app.icon),
+    domain: domainFromUrl(app.url),
+  }
+}
+
+export const getStartpageData = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    const session = await getSession()
+    const authenticated = Boolean(session)
+    const categories = await listCategoriesWithApps(authenticated)
+    return {
+      authenticated,
+      categories: categories.map((cat) => ({
+        ...cat,
+        apps: cat.apps.map(decorateApp),
+      })),
+    }
+  },
+)
+
+export const getAdminData = createServerFn({ method: 'GET' })
+  .middleware([requireAuthMiddleware])
+  .handler(async () => {
+    const categories = await listCategoriesWithApps(true)
+    return {
+      categories: categories.map((cat) => ({
+        ...cat,
+        apps: cat.apps.map(decorateApp),
+      })),
+    }
+  })
+
+export const createCategoryFn = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(
+    z.object({
+      name: z.string().min(1),
+      visibility: z.enum(['public', 'auth']),
+    }),
+  )
+  .handler(async ({ data }) => createCategory(data))
+
+export const updateCategoryFn = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(
+    z.object({
+      id: z.string().min(1),
+      name: z.string().min(1),
+      visibility: z.enum(['public', 'auth']),
+      sort_order: z.number().int(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    await updateCategory(data)
+    return { ok: true }
+  })
+
+export const deleteCategoryFn = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(z.object({ id: z.string().min(1) }))
+  .handler(async ({ data }) => {
+    await deleteCategory(data.id)
+    return { ok: true }
+  })
+
+export const createAppFn = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(
+    z.object({
+      category_id: z.string().min(1),
+      name: z.string().min(1),
+      url: z.string().min(1),
+      icon: z.string().min(1),
+    }),
+  )
+  .handler(async ({ data }) => createApp(data))
+
+export const updateAppFn = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(
+    z.object({
+      id: z.string().min(1),
+      category_id: z.string().min(1),
+      name: z.string().min(1),
+      url: z.string().min(1),
+      icon: z.string().min(1),
+      sort_order: z.number().int(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    await updateApp(data)
+    return { ok: true }
+  })
+
+export const deleteAppFn = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(z.object({ id: z.string().min(1) }))
+  .handler(async ({ data }) => {
+    await deleteApp(data.id)
+    return { ok: true }
+  })
+
+export const reorderLayoutFn = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(
+    z.object({
+      categories: z.array(
+        z.object({ id: z.string().min(1), sort_order: z.number().int() }),
+      ),
+      apps: z.array(
+        z.object({
+          id: z.string().min(1),
+          category_id: z.string().min(1),
+          sort_order: z.number().int(),
+        }),
+      ),
+    }),
+  )
+  .handler(async ({ data }) => {
+    await reorderLayout(data)
+    return { ok: true }
+  })
+
+export const importDataFn = createServerFn({ method: 'POST' })
+  .middleware([requireAuthMiddleware])
+  .validator(z.object({ json: z.string().min(2) }))
+  .handler(async ({ data }) => {
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(data.json)
+    } catch {
+      throw new Error('Invalid JSON')
+    }
+    return importSui2Apps(parsed as import('#/lib/types').Sui2ImportPayload)
+  })

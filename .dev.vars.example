@@ -1,0 +1,4 @@
+SETUP_TOKEN=dev-setup-token-change-me
+WEBAUTHN_RP_ID=localhost
+WEBAUTHN_ORIGIN=http://localhost:8333
+ACCESS_TOKEN_TTL_DAYS=90
