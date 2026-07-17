@@ -7,5 +7,6 @@ declare module 'cloudflare:workers' {
     WEBAUTHN_RP_ID: string
     WEBAUTHN_ORIGIN: string
     ACCESS_TOKEN_TTL_DAYS?: string
+    CREDENTIAL_ENCRYPTION_KEY?: string
   }
 }

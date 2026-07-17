@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
+import { setResponseHeader } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import {
   createApp,
@@ -11,9 +12,12 @@ import {
   updateApp,
   updateCategory,
 } from '#/lib/apps'
-import { requireAuthMiddleware } from '#/lib/auth-middleware'
+import {
+  optionalAuthMiddleware,
+  requireAuthMiddleware,
+} from '#/lib/auth-middleware'
 import { domainFromUrl, getAppIconSvg } from '#/lib/icons'
-import { getSession } from '#/lib/session'
+import { loadStartpageData } from '#/lib/startpage-data'
 import type { AppItem, DecoratedApp } from '#/lib/types'
 
 /** Attach the rendered icon SVG and display domain to a raw app row. */
@@ -25,24 +29,18 @@ function decorateApp(app: AppItem): DecoratedApp {
   }
 }
 
-export const getStartpageData = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    const session = await getSession()
-    const authenticated = Boolean(session)
-    const categories = await listCategoriesWithApps(authenticated)
-    return {
-      authenticated,
-      categories: categories.map((cat) => ({
-        ...cat,
-        apps: cat.apps.map(decorateApp),
-      })),
-    }
-  },
-)
+export const getStartpageData = createServerFn({ method: 'GET' })
+  .middleware([optionalAuthMiddleware])
+  .handler(async ({ context }) => {
+    setResponseHeader('Cache-Control', 'no-store')
+    const { authenticated } = context
+    return loadStartpageData(authenticated)
+  })
 
 export const getAdminData = createServerFn({ method: 'GET' })
   .middleware([requireAuthMiddleware])
   .handler(async () => {
+    setResponseHeader('Cache-Control', 'no-store')
     const categories = await listCategoriesWithApps(true)
     return {
       categories: categories.map((cat) => ({

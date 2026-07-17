@@ -1,9 +1,12 @@
 import type { SVGAttributes } from 'react'
 import {
+  AlertCircle,
   Check,
+  CheckCircle,
   Grid,
   Key,
   Lock,
+  Loader,
   LogIn,
   LogOut,
   Menu,
@@ -19,10 +22,13 @@ import {
 } from 'react-feather'
 
 const icons = {
+  AlertCircle,
   Check,
+  CheckCircle,
   Grid,
   Key,
   Lock,
+  Loader,
   LogIn,
   LogOut,
   Menu,

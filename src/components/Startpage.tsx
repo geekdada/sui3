@@ -16,6 +16,7 @@ export type StartpageCategory = {
   id: string
   name: string
   visibility: 'public' | 'auth'
+  emptyMessage?: string
   apps: StartpageApp[]
 }
 
@@ -157,21 +158,27 @@ export default function Startpage({
                 </span>
               ) : null}
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-              {category.apps.map((app) => {
-                const matched = matchedIds.includes(app.id)
-                const label = highlights[app.id] ?? app.name
-                return (
-                  <AppCard
-                    key={app.id}
-                    app={app}
-                    matched={matched}
-                    tabIndex={matched ? matchedIds.indexOf(app.id) + 1 : 0}
-                    label={label}
-                  />
-                )
-              })}
-            </div>
+            {category.apps.length === 0 && category.emptyMessage ? (
+              <p className="text-sm text-muted-foreground">
+                {category.emptyMessage}
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                {category.apps.map((app) => {
+                  const matched = matchedIds.includes(app.id)
+                  const label = highlights[app.id] ?? app.name
+                  return (
+                    <AppCard
+                      key={app.id}
+                      app={app}
+                      matched={matched}
+                      tabIndex={matched ? matchedIds.indexOf(app.id) + 1 : 0}
+                      label={label}
+                    />
+                  )
+                })}
+              </div>
+            )}
           </section>
         ))
       )}

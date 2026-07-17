@@ -62,6 +62,7 @@ Local: `.dev.vars` (gitignored). Production: Wrangler secrets/vars.
 | `WEBAUTHN_RP_ID` | yes | e.g. `localhost` or `sui3.example.com` |
 | `WEBAUTHN_ORIGIN` | yes | e.g. `http://localhost:8333` or `https://sui3.example.com` |
 | `ACCESS_TOKEN_TTL_DAYS` | no | Default `90` |
+| `CREDENTIAL_ENCRYPTION_KEY` | for Tailscale | Base64-encoded 32-byte key for encrypting OAuth credentials in D1 |
 
 ## Auth flow
 
@@ -91,6 +92,7 @@ pnpm cf-typegen
 
 1. Create D1: `wrangler d1 create sui3` and put the real `database_id` in `wrangler.jsonc`
 2. Set secrets/vars (`SETUP_TOKEN`, `WEBAUTHN_RP_ID`, `WEBAUTHN_ORIGIN`)
+   - Set `CREDENTIAL_ENCRYPTION_KEY` before configuring Tailscale in Admin
 3. `pnpm db:migrate:remote`
 4. `pnpm deploy`
 5. Open `/setup` once

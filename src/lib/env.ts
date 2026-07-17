@@ -27,3 +27,11 @@ export function getWebAuthnConfig() {
 export function getSetupToken(): string {
   return getEnv().SETUP_TOKEN
 }
+
+export function getCredentialEncryptionKey(): string {
+  const key = getEnv().CREDENTIAL_ENCRYPTION_KEY
+  if (!key) {
+    throw new Error('CREDENTIAL_ENCRYPTION_KEY is not configured')
+  }
+  return key
+}
