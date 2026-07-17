@@ -14,7 +14,7 @@ import {
 } from '#/lib/tailscale-service'
 
 const INTEGRATION_ID = 1
-const CACHE_TTL_SECONDS = 5 * 60
+const CACHE_TTL_SECONDS = 24 * 60 * 60
 const TAILSCALE_CATEGORY_ID = 'integration:tailscale-services'
 
 type TailscaleIntegrationRow = {

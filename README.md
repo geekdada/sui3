@@ -9,7 +9,7 @@ Single-user personal startpage on TanStack Start, Cloudflare Workers, and D1.
 - Passkey login (one credential) via deploy-time setup token
 - Long-lived access cookie (sliding 90-day TTL)
 - Import sui2 `data.json` (apps only; overwrite)
-- Private Tailscale Services section synced from a read-only OAuth client
+- Private Tailscale Services section with a 24-hour cache and manual refresh
 
 ## Local development
 

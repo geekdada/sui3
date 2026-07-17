@@ -226,12 +226,12 @@ describe('Tailscale integration persistence and cache', () => {
     })
     mocks.fetchTailscaleServicesSnapshot.mockClear()
 
-    mocks.nowSeconds.mockReturnValue(1_299)
+    mocks.nowSeconds.mockReturnValue(87_399)
     const fresh = await getTailscaleStartpageCategory()
     expect(mocks.fetchTailscaleServicesSnapshot).not.toHaveBeenCalled()
     expect(fresh?.apps.map((app) => app.name)).toEqual(['web'])
 
-    mocks.nowSeconds.mockReturnValue(1_300)
+    mocks.nowSeconds.mockReturnValue(87_400)
     mocks.fetchTailscaleServicesSnapshot.mockRejectedValueOnce(
       new Error('raw upstream detail that must not persist'),
     )
@@ -250,7 +250,7 @@ describe('Tailscale integration persistence and cache', () => {
     db.row.last_sync_at = 2_000
     db.row.last_sync_attempt_at = 2_000
     db.row.last_sync_error = null
-    mocks.nowSeconds.mockReturnValue(2_300)
+    mocks.nowSeconds.mockReturnValue(88_400)
     mocks.fetchTailscaleServicesSnapshot.mockRejectedValueOnce(
       new Error('Tailscale API request failed (503)'),
     )
