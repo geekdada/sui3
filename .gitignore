@@ -13,3 +13,4 @@ dist-ssr
 __unconfig*
 todos.json
 worker-configuration.d.ts
+wrangler.*.jsonc
