@@ -26,7 +26,7 @@ export const saveTailscaleSettingsFn = createServerFn({ method: 'POST' })
     z.object({
       clientId: z.string().trim().min(1).max(256),
       clientSecret: z.string().max(2048).optional(),
-      tailnetDnsName: z.string().trim().min(1).max(253),
+      tailnetDnsNameFallback: z.string().trim().max(253).optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -34,6 +34,7 @@ export const saveTailscaleSettingsFn = createServerFn({ method: 'POST' })
     return saveTailscaleSettings({
       ...data,
       clientSecret: data.clientSecret || undefined,
+      tailnetDnsNameFallback: data.tailnetDnsNameFallback || undefined,
     })
   })
 

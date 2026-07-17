@@ -5,9 +5,9 @@ import {
 } from '#/lib/credential-crypto'
 import { getCredentialEncryptionKey, getDb } from '#/lib/env'
 import { domainFromUrl, getAppIconSvg } from '#/lib/icons'
+import { TAILNET_DNS_DISCOVERY_ERROR_CODE } from '#/lib/tailscale-errors'
 import {
-  fetchTailscaleServices,
-  normalizeTailnetDnsName,
+  fetchTailscaleServicesSnapshot,
   shouldRefreshTailscaleCache,
   type TailscaleCachedService,
   type TailscaleSettingsSummary,
@@ -32,7 +32,7 @@ type TailscaleIntegrationRow = {
 type SaveTailscaleSettingsInput = {
   clientId: string
   clientSecret?: string
-  tailnetDnsName: string
+  tailnetDnsNameFallback?: string
 }
 
 async function readIntegration(): Promise<TailscaleIntegrationRow | null> {
@@ -93,7 +93,10 @@ function safeSyncError(error: unknown): string {
   if (!(error instanceof Error)) return 'Tailscale sync failed'
   const allowedPrefixes = [
     'Tailscale ',
+    'Tailnet DNS name ',
+    `${TAILNET_DNS_DISCOVERY_ERROR_CODE}: `,
     'Invalid Tailscale ',
+    'Unable to determine Tailscale ',
     'Unable to decrypt ',
     'CREDENTIAL_ENCRYPTION_KEY ',
   ]
@@ -121,21 +124,27 @@ async function syncRow(
 ): Promise<TailscaleCachedService[]> {
   const attemptAt = nowSeconds()
   try {
-    const services = await fetchTailscaleServices({
+    const result = await fetchTailscaleServicesSnapshot({
       clientId: row.client_id,
       clientSecret: await decryptedSecret(row),
-      tailnetDnsName: row.tailnet_dns_name,
+      tailnetDnsNameFallback: row.tailnet_dns_name,
     })
     await getDb()
       .prepare(
         `UPDATE tailscale_integration
-         SET cached_services_json = ?, last_sync_at = ?,
+         SET tailnet_dns_name = ?, cached_services_json = ?, last_sync_at = ?,
              last_sync_attempt_at = ?, last_sync_error = NULL
          WHERE id = ?`,
       )
-      .bind(JSON.stringify(services), attemptAt, attemptAt, INTEGRATION_ID)
+      .bind(
+        result.tailnetDnsName,
+        JSON.stringify(result.services),
+        attemptAt,
+        attemptAt,
+        INTEGRATION_ID,
+      )
       .run()
-    return services
+    return result.services
   } catch (error) {
     const safeError = safeSyncError(error)
     logSafeTailscaleError('Service refresh', error)
@@ -160,19 +169,18 @@ export async function saveTailscaleSettings(
   const existing = await readIntegration()
   const encryptionKey = getCredentialEncryptionKey()
   const clientId = input.clientId.trim()
-  const tailnetDnsName = normalizeTailnetDnsName(input.tailnetDnsName)
   let clientSecret = input.clientSecret
   if (!clientSecret && existing) clientSecret = await decryptedSecret(existing)
   if (!clientSecret) {
     throw new Error('Enter a Tailscale OAuth client secret')
   }
 
-  let services: TailscaleCachedService[]
+  let result: Awaited<ReturnType<typeof fetchTailscaleServicesSnapshot>>
   try {
-    services = await fetchTailscaleServices({
+    result = await fetchTailscaleServicesSnapshot({
       clientId,
       clientSecret,
-      tailnetDnsName,
+      tailnetDnsNameFallback: input.tailnetDnsNameFallback,
     })
   } catch (error) {
     logSafeTailscaleError('Credential validation', error)
@@ -209,8 +217,8 @@ export async function saveTailscaleSettings(
       clientId,
       encrypted.ciphertext,
       encrypted.iv,
-      tailnetDnsName,
-      JSON.stringify(services),
+      result.tailnetDnsName,
+      JSON.stringify(result.services),
       now,
       now,
       now,

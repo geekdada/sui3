@@ -19,6 +19,7 @@ import {
   refreshTailscaleServicesFn,
   saveTailscaleSettingsFn,
 } from '#/lib/tailscale.functions'
+import { getTailnetDnsDiscoveryErrorMessage } from '#/lib/tailscale-errors'
 import type { TailscaleSettingsSummary } from '#/lib/tailscale-service'
 
 type PendingAction = 'save' | 'refresh' | 'disconnect'
@@ -40,16 +41,16 @@ export default function TailscaleSettingsPanel({
   const deleteSettings = useServerFn(deleteTailscaleSettingsFn)
   const [clientId, setClientId] = useState(settings.clientId)
   const [clientSecret, setClientSecret] = useState('')
-  const [tailnetDnsName, setTailnetDnsName] = useState(
-    settings.tailnetDnsName,
+  const [tailnetDnsNameFallback, setTailnetDnsNameFallback] = useState('')
+  const [showTailnetFallback, setShowTailnetFallback] = useState(
+    getTailnetDnsDiscoveryErrorMessage(settings.lastSyncError ?? '') !== null,
   )
   const [pending, setPending] = useState<PendingAction | null>(null)
   const [notice, setNotice] = useState<Notice | null>(null)
 
   useEffect(() => {
     setClientId(settings.clientId)
-    setTailnetDnsName(settings.tailnetDnsName)
-  }, [settings.clientId, settings.tailnetDnsName])
+  }, [settings.clientId])
 
   async function run(
     action: PendingAction,
@@ -60,13 +61,23 @@ export default function TailscaleSettingsPanel({
     setNotice(null)
     try {
       await operation()
-      if (action === 'save') setClientSecret('')
+      if (action === 'save') {
+        setClientSecret('')
+        setTailnetDnsNameFallback('')
+        setShowTailnetFallback(false)
+      }
       await router.invalidate()
       setNotice({ kind: 'success', text: success })
     } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Tailscale request failed'
+      const discoveryError = getTailnetDnsDiscoveryErrorMessage(message)
+      if (action === 'save' && discoveryError !== null) {
+        setShowTailnetFallback(true)
+      }
       setNotice({
         kind: 'error',
-        text: error instanceof Error ? error.message : 'Tailscale request failed',
+        text: discoveryError ?? message,
       })
     } finally {
       setPending(null)
@@ -82,7 +93,7 @@ export default function TailscaleSettingsPanel({
           data: {
             clientId,
             clientSecret: clientSecret || undefined,
-            tailnetDnsName,
+            tailnetDnsNameFallback: tailnetDnsNameFallback || undefined,
           },
         }),
       'Credentials verified and services refreshed.',
@@ -97,13 +108,20 @@ export default function TailscaleSettingsPanel({
         await deleteSettings()
         setClientId('')
         setClientSecret('')
-        setTailnetDnsName('')
+        setTailnetDnsNameFallback('')
+        setShowTailnetFallback(false)
       },
       'Tailscale disconnected.',
     )
   }
 
-  const shownError = notice?.kind === 'error' ? notice.text : settings.lastSyncError
+  const storedDiscoveryError = getTailnetDnsDiscoveryErrorMessage(
+    settings.lastSyncError ?? '',
+  )
+  const shownError =
+    notice?.kind === 'error'
+      ? notice.text
+      : (storedDiscoveryError ?? settings.lastSyncError)
 
   return (
     <section className="mt-10">
@@ -157,26 +175,31 @@ export default function TailscaleSettingsPanel({
                 >
                   all:read scope
                 </a>
-                .
+                . The tailnet DNS name is discovered automatically from an
+                internal device.
               </FieldDescription>
             </Field>
 
-            <Field>
-              <FieldLabel htmlFor="tailscale-dns-name">
-                Tailnet DNS name
-              </FieldLabel>
-              <Input
-                id="tailscale-dns-name"
-                value={tailnetDnsName}
-                onChange={(event) => setTailnetDnsName(event.target.value)}
-                autoComplete="off"
-                placeholder="tail1234.ts.net"
-                required
-              />
-              <FieldDescription>
-                Enter the MagicDNS suffix only, without a protocol, path, or port.
-              </FieldDescription>
-            </Field>
+            {showTailnetFallback ? (
+              <Field>
+                <FieldLabel htmlFor="tailscale-dns-name-fallback">
+                  Tailnet DNS name fallback
+                </FieldLabel>
+                <Input
+                  id="tailscale-dns-name-fallback"
+                  value={tailnetDnsNameFallback}
+                  onChange={(event) =>
+                    setTailnetDnsNameFallback(event.target.value)
+                  }
+                  autoComplete="off"
+                  placeholder="tail1234.ts.net"
+                />
+                <FieldDescription>
+                  Automatic discovery failed. Enter the MagicDNS suffix without
+                  a protocol, path, or port, or retry discovery later.
+                </FieldDescription>
+              </Field>
+            ) : null}
           </FieldGroup>
         </FieldSet>
 
@@ -223,6 +246,12 @@ export default function TailscaleSettingsPanel({
           <div>
             <dt className="text-xs text-muted-foreground">Services</dt>
             <dd className="m-0 font-mono tabular-nums">{settings.serviceCount}</dd>
+          </div>
+          <div className="col-span-2">
+            <dt className="text-xs text-muted-foreground">Tailnet DNS name</dt>
+            <dd className="m-0 font-mono text-xs">
+              {settings.tailnetDnsName}
+            </dd>
           </div>
           <div className="col-span-2">
             <dt className="text-xs text-muted-foreground">Last sync</dt>

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
-  fetchTailscaleServices,
+  discoverTailnetDnsName,
+  fetchTailscaleServicesSnapshot,
   normalizeTailnetDnsName,
   normalizeTailscaleServices,
   shouldRefreshTailscaleCache,
@@ -66,6 +67,42 @@ describe('Tailscale service normalization', () => {
     expect(() => normalizeTailnetDnsName('-bad.ts.net')).toThrow('hostname')
   })
 
+  it('discovers the DNS suffix from an internal device FQDN', () => {
+    expect(
+      discoverTailnetDnsName({
+        devices: [
+          {
+            name: 'shared.other-tailnet.ts.net',
+            isExternal: true,
+          },
+          {
+            name: 'server.Tail1234.TS.NET.',
+            isExternal: false,
+          },
+        ],
+      }),
+    ).toBe('tail1234.ts.net')
+  })
+
+  it('rejects malformed device lists and ambiguous internal suffixes', () => {
+    expect(() => discoverTailnetDnsName({ devices: 'invalid' })).toThrow(
+      'Invalid Tailscale Devices response',
+    )
+    expect(() =>
+      discoverTailnetDnsName({
+        devices: [{ name: 'shared.other.ts.net', isExternal: true }],
+      }),
+    ).toThrow('Unable to determine Tailscale tailnet DNS name')
+    expect(() =>
+      discoverTailnetDnsName({
+        devices: [
+          { name: 'one.first.ts.net', isExternal: false },
+          { name: 'two.second.ts.net', isExternal: false },
+        ],
+      }),
+    ).toThrow('Unable to determine Tailscale tailnet DNS name')
+  })
+
   it('refreshes successful and failed syncs at the configured interval', () => {
     expect(
       shouldRefreshTailscaleCache(
@@ -111,6 +148,17 @@ describe('Tailscale API client', () => {
       if (url.endsWith('/oauth/token')) {
         return Response.json({ access_token: 'short-lived-access-token' })
       }
+      if (url.endsWith('/devices')) {
+        return Response.json({
+          devices: [
+            {
+              name: 'server.tail1234.ts.net',
+              hostname: 'server',
+              isExternal: false,
+            },
+          ],
+        })
+      }
       return Response.json({
         vipServices: [
           {
@@ -124,21 +172,26 @@ describe('Tailscale API client', () => {
     })
 
     await expect(
-      fetchTailscaleServices({
+      fetchTailscaleServicesSnapshot({
         clientId: 'client-id',
         clientSecret: 'secret',
-        tailnetDnsName: 'tail1234.ts.net',
         fetchImpl,
       }),
-    ).resolves.toEqual([
-      {
-        id: 'tailscale:svc:web',
-        name: 'web',
-        url: 'https://web.tail1234.ts.net/',
-      },
-    ])
-    expect(requests[1]).toBe(
+    ).resolves.toEqual({
+      tailnetDnsName: 'tail1234.ts.net',
+      services: [
+        {
+          id: 'tailscale:svc:web',
+          name: 'web',
+          url: 'https://web.tail1234.ts.net/',
+        },
+      ],
+    })
+    expect(requests).toContain(
       'https://api.tailscale.com/api/v2/tailnet/-/vip-services',
+    )
+    expect(requests).toContain(
+      'https://api.tailscale.com/api/v2/tailnet/-/devices',
     )
   })
 
@@ -153,28 +206,42 @@ describe('Tailscale API client', () => {
           { status: 200, headers: { 'content-type': 'application/json' } },
         )
       }
+      if (url.endsWith('/devices')) {
+        return Response.json({
+          devices: [
+            {
+              name: 'server.tail1234.ts.net',
+              isExternal: false,
+            },
+          ],
+        })
+      }
       return new Response(
-        JSON.stringify([{ name: 'svc:web', ports: ['tcp:443'] }]),
+        JSON.stringify({
+          vipServices: [{ name: 'svc:web', ports: ['tcp:443'] }],
+        }),
         { status: 200, headers: { 'content-type': 'application/json' } },
       )
     })
 
     await expect(
-      fetchTailscaleServices({
+      fetchTailscaleServicesSnapshot({
         clientId: 'client-id',
         clientSecret: 'CaseSensitiveSecret',
-        tailnetDnsName: 'tail1234.ts.net',
         fetchImpl,
       }),
-    ).resolves.toEqual([
-      {
-        id: 'tailscale:svc:web',
-        name: 'web',
-        url: 'https://web.tail1234.ts.net/',
-      },
-    ])
+    ).resolves.toEqual({
+      tailnetDnsName: 'tail1234.ts.net',
+      services: [
+        {
+          id: 'tailscale:svc:web',
+          name: 'web',
+          url: 'https://web.tail1234.ts.net/',
+        },
+      ],
+    })
 
-    expect(requests).toHaveLength(2)
+    expect(requests).toHaveLength(3)
     expect(requests[0]?.url).toBe(
       'https://api.tailscale.com/api/v2/oauth/token',
     )
@@ -183,13 +250,72 @@ describe('Tailscale API client', () => {
     expect(String(tokenBody)).toContain('client_id=client-id')
     expect(String(tokenBody)).toContain('client_secret=CaseSensitiveSecret')
     expect(String(tokenBody)).toContain('scope=all%3Aread')
-    expect(requests[1]?.url).toBe(
+    expect(requests.slice(1).map((request) => request.url)).toEqual([
       'https://api.tailscale.com/api/v2/tailnet/-/vip-services',
-    )
-    expect(requests[1]?.init?.headers).toEqual({
-      Authorization: 'Bearer short-lived-access-token',
-      Accept: 'application/json',
+      'https://api.tailscale.com/api/v2/tailnet/-/devices',
+    ])
+    for (const request of requests.slice(1)) {
+      expect(request.init?.headers).toEqual({
+        Authorization: 'Bearer short-lived-access-token',
+        Accept: 'application/json',
+      })
+    }
+  })
+
+  it('uses a validated manual DNS fallback when device discovery fails', async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url.endsWith('/oauth/token')) {
+        return Response.json({ access_token: 'short-lived-access-token' })
+      }
+      if (url.endsWith('/devices')) {
+        return new Response('raw-device-error', { status: 503 })
+      }
+      return Response.json({
+        vipServices: [{ name: 'svc:web', ports: ['tcp:443'] }],
+      })
     })
+
+    await expect(
+      fetchTailscaleServicesSnapshot({
+        clientId: 'client-id',
+        clientSecret: 'secret',
+        tailnetDnsNameFallback: ' Manual-Tailnet.TS.NET. ',
+        fetchImpl,
+      }),
+    ).resolves.toEqual({
+      tailnetDnsName: 'manual-tailnet.ts.net',
+      services: [
+        {
+          id: 'tailscale:svc:web',
+          name: 'web',
+          url: 'https://web.manual-tailnet.ts.net/',
+        },
+      ],
+    })
+  })
+
+  it('classifies device discovery failures for the manual fallback UI', async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url.endsWith('/oauth/token')) {
+        return Response.json({ access_token: 'short-lived-access-token' })
+      }
+      if (url.endsWith('/devices')) {
+        return new Response(null, { status: 503 })
+      }
+      return Response.json({ vipServices: [] })
+    })
+
+    await expect(
+      fetchTailscaleServicesSnapshot({
+        clientId: 'client-id',
+        clientSecret: 'secret',
+        fetchImpl,
+      }),
+    ).rejects.toThrow(
+      'TAILNET_DNS_DISCOVERY_FAILED: Tailscale Devices request failed (503)',
+    )
   })
 
   it('returns sanitized HTTP failures without including response bodies', async () => {
@@ -197,10 +323,9 @@ describe('Tailscale API client', () => {
       new Response('raw-body-with-sensitive-details', { status: 401 }),
     )
 
-    const result = fetchTailscaleServices({
+    const result = fetchTailscaleServicesSnapshot({
       clientId: 'client-id',
       clientSecret: 'secret',
-      tailnetDnsName: 'tail1234.ts.net',
       fetchImpl,
     })
 
@@ -219,10 +344,9 @@ describe('Tailscale API client', () => {
     )
 
     await expect(
-      fetchTailscaleServices({
+      fetchTailscaleServicesSnapshot({
         clientId: 'client-id',
         clientSecret: 'secret',
-        tailnetDnsName: 'tail1234.ts.net',
         fetchImpl,
         timeoutMs: 1,
       }),

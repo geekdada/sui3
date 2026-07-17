@@ -1,7 +1,9 @@
 import { z } from 'zod'
+import { createTailnetDnsDiscoveryError } from '#/lib/tailscale-errors'
 
 const TOKEN_URL = 'https://api.tailscale.com/api/v2/oauth/token'
 const SERVICES_URL = 'https://api.tailscale.com/api/v2/tailnet/-/vip-services'
+const DEVICES_URL = 'https://api.tailscale.com/api/v2/tailnet/-/devices'
 const DEFAULT_TIMEOUT_MS = 10_000
 
 const tokenResponseSchema = z.object({ access_token: z.string().min(1) })
@@ -13,11 +15,24 @@ const servicesResponseSchema = z.union([
   z.array(serviceSchema),
   z.object({ vipServices: z.array(serviceSchema) }),
 ])
+const devicesResponseSchema = z.object({
+  devices: z.array(
+    z.object({
+      name: z.string().min(1),
+      isExternal: z.boolean(),
+    }),
+  ),
+})
 
 export type TailscaleCachedService = {
   id: string
   name: string
   url: string
+}
+
+export type TailscaleServicesSnapshot = {
+  tailnetDnsName: string
+  services: TailscaleCachedService[]
 }
 
 export type TailscaleSettingsSummary = {
@@ -45,10 +60,10 @@ export function shouldRefreshTailscaleCache(
   return freshnessAnchor === null || now - freshnessAnchor >= ttlSeconds
 }
 
-type FetchTailscaleServicesInput = {
+type FetchTailscaleServicesSnapshotInput = {
   clientId: string
   clientSecret: string
-  tailnetDnsName: string
+  tailnetDnsNameFallback?: string
   fetchImpl?: typeof fetch
   timeoutMs?: number
 }
@@ -67,6 +82,31 @@ export function normalizeTailnetDnsName(value: string): string {
     throw new Error('Tailnet DNS name must be a hostname without a URL or port')
   }
   return hostname
+}
+
+export function discoverTailnetDnsName(payload: unknown): string {
+  const parsed = devicesResponseSchema.safeParse(payload)
+  if (!parsed.success) {
+    throw new Error('Invalid Tailscale Devices response')
+  }
+
+  const suffixes = new Set<string>()
+  for (const device of parsed.data.devices) {
+    if (device.isExternal) continue
+    const name = device.name.trim().replace(/\.$/, '').toLowerCase()
+    const firstDot = name.indexOf('.')
+    if (firstDot <= 0) continue
+    try {
+      suffixes.add(normalizeTailnetDnsName(name.slice(firstDot + 1)))
+    } catch {
+      // Ignore malformed device names; another internal device may be valid.
+    }
+  }
+
+  if (suffixes.size !== 1) {
+    throw new Error('Unable to determine Tailscale tailnet DNS name')
+  }
+  return [...suffixes][0] as string
 }
 
 function includesTcpPort(value: string, port: 80 | 443): boolean {
@@ -162,13 +202,13 @@ async function readJson(response: Response, label: string): Promise<unknown> {
   }
 }
 
-export async function fetchTailscaleServices({
+export async function fetchTailscaleServicesSnapshot({
   clientId,
   clientSecret,
-  tailnetDnsName,
+  tailnetDnsNameFallback,
   fetchImpl = fetch,
   timeoutMs = DEFAULT_TIMEOUT_MS,
-}: FetchTailscaleServicesInput): Promise<TailscaleCachedService[]> {
+}: FetchTailscaleServicesSnapshotInput): Promise<TailscaleServicesSnapshot> {
   const body = new URLSearchParams({
     client_id: clientId,
     client_secret: clientSecret,
@@ -194,21 +234,41 @@ export async function fetchTailscaleServices({
     throw new Error('Tailscale OAuth returned an invalid response')
   }
 
-  const servicesResponse = await requestWithTimeout(
-    SERVICES_URL,
-    {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token.data.access_token}`,
-        Accept: 'application/json',
-      },
+  const authorizedRequest = {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token.data.access_token}`,
+      Accept: 'application/json',
     },
-    fetchImpl,
-    timeoutMs,
-  )
-  const servicesPayload = await readJson(
-    servicesResponse,
-    'Tailscale Services',
-  )
-  return normalizeTailscaleServices(servicesPayload, tailnetDnsName)
+  } satisfies RequestInit
+  const [servicesResult, devicesResult] = await Promise.allSettled([
+    requestWithTimeout(
+      SERVICES_URL,
+      authorizedRequest,
+      fetchImpl,
+      timeoutMs,
+    ).then((response) => readJson(response, 'Tailscale Services')),
+    requestWithTimeout(
+      DEVICES_URL,
+      authorizedRequest,
+      fetchImpl,
+      timeoutMs,
+    ).then((response) => readJson(response, 'Tailscale Devices')),
+  ])
+  if (servicesResult.status === 'rejected') throw servicesResult.reason
+
+  let tailnetDnsName: string
+  try {
+    if (devicesResult.status === 'rejected') throw devicesResult.reason
+    tailnetDnsName = discoverTailnetDnsName(devicesResult.value)
+  } catch (error) {
+    if (!tailnetDnsNameFallback) {
+      throw createTailnetDnsDiscoveryError(error)
+    }
+    tailnetDnsName = normalizeTailnetDnsName(tailnetDnsNameFallback)
+  }
+  return {
+    tailnetDnsName,
+    services: normalizeTailscaleServices(servicesResult.value, tailnetDnsName),
+  }
 }

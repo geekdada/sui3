@@ -49,8 +49,10 @@ pnpm deploy
 Then visit `/setup` once on the live origin.
 
 To enable Tailscale Services, create a Tailscale OAuth client with the
-read-only `all:read` scope, then enter its client ID, client secret, and the
-tailnet MagicDNS suffix in Admin → Tailscale.
+read-only `all:read` scope, then enter its client ID and client secret in
+Admin → Tailscale. SUI3 derives the tailnet MagicDNS suffix from internal
+device FQDNs returned by the Tailscale API and refreshes it on every sync. If
+discovery fails during setup, Admin reveals an optional manual DNS fallback.
 
 ## Scripts
 
