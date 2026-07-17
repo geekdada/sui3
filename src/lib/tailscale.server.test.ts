@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { TailscaleCachedService } from '#/lib/tailscale-service'
 
 type IntegrationRow = {
@@ -117,6 +117,10 @@ describe('Tailscale integration persistence and cache', () => {
     mocks.nowSeconds.mockReturnValue(1_000)
   })
 
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('stores encrypted credentials while returning a secret-free summary', async () => {
     mocks.fetchTailscaleServices.mockResolvedValue([webService])
 
@@ -177,6 +181,7 @@ describe('Tailscale integration persistence and cache', () => {
   })
 
   it('uses fresh cache and retains stale or empty last-good results on failure', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     mocks.fetchTailscaleServices.mockResolvedValueOnce([webService])
     await saveTailscaleSettings({
       clientId: 'client-id',
@@ -198,6 +203,11 @@ describe('Tailscale integration persistence and cache', () => {
     expect(stale?.apps.map((app) => app.name)).toEqual(['web'])
     expect(stale?.emptyMessage).toBeUndefined()
     expect(db.row?.last_sync_error).toBe('Tailscale sync failed')
+    const loggedError = consoleError.mock.calls.flat().join(' ')
+    expect(loggedError).toContain(
+      '[tailscale] Service refresh failed: Tailscale sync failed',
+    )
+    expect(loggedError).not.toContain('raw upstream detail')
 
     if (!db.row) throw new Error('Missing integration row')
     db.row.cached_services_json = '[]'

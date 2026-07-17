@@ -103,6 +103,45 @@ describe('Tailscale service normalization', () => {
 })
 
 describe('Tailscale API client', () => {
+  it('accepts the official vipServices list response', async () => {
+    const requests: string[] = []
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input)
+      requests.push(url)
+      if (url.endsWith('/oauth/token')) {
+        return Response.json({ access_token: 'short-lived-access-token' })
+      }
+      return Response.json({
+        vipServices: [
+          {
+            name: 'svc:web',
+            addrs: ['100.64.0.1'],
+            ports: ['tcp:443'],
+            tags: ['tag:web'],
+          },
+        ],
+      })
+    })
+
+    await expect(
+      fetchTailscaleServices({
+        clientId: 'client-id',
+        clientSecret: 'secret',
+        tailnetDnsName: 'tail1234.ts.net',
+        fetchImpl,
+      }),
+    ).resolves.toEqual([
+      {
+        id: 'tailscale:svc:web',
+        name: 'web',
+        url: 'https://web.tail1234.ts.net/',
+      },
+    ])
+    expect(requests[1]).toBe(
+      'https://api.tailscale.com/api/v2/tailnet/-/vip-services',
+    )
+  })
+
   it('exchanges OAuth credentials and lists services with bearer auth', async () => {
     const requests: Array<{ url: string; init?: RequestInit }> = []
     const fetchImpl = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -145,7 +184,7 @@ describe('Tailscale API client', () => {
     expect(String(tokenBody)).toContain('client_secret=CaseSensitiveSecret')
     expect(String(tokenBody)).toContain('scope=all%3Aread')
     expect(requests[1]?.url).toBe(
-      'https://api.tailscale.com/api/v2/tailnet/-/services',
+      'https://api.tailscale.com/api/v2/tailnet/-/vip-services',
     )
     expect(requests[1]?.init?.headers).toEqual({
       Authorization: 'Bearer short-lived-access-token',

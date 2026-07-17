@@ -93,12 +93,17 @@ function safeSyncError(error: unknown): string {
   if (!(error instanceof Error)) return 'Tailscale sync failed'
   const allowedPrefixes = [
     'Tailscale ',
+    'Invalid Tailscale ',
     'Unable to decrypt ',
     'CREDENTIAL_ENCRYPTION_KEY ',
   ]
   return allowedPrefixes.some((prefix) => error.message.startsWith(prefix))
     ? error.message
     : 'Tailscale sync failed'
+}
+
+function logSafeTailscaleError(operation: string, error: unknown): void {
+  console.error(`[tailscale] ${operation} failed: ${safeSyncError(error)}`)
 }
 
 async function decryptedSecret(row: TailscaleIntegrationRow): Promise<string> {
@@ -133,6 +138,7 @@ async function syncRow(
     return services
   } catch (error) {
     const safeError = safeSyncError(error)
+    logSafeTailscaleError('Service refresh', error)
     await getDb()
       .prepare(
         `UPDATE tailscale_integration
@@ -161,11 +167,17 @@ export async function saveTailscaleSettings(
     throw new Error('Enter a Tailscale OAuth client secret')
   }
 
-  const services = await fetchTailscaleServices({
-    clientId,
-    clientSecret,
-    tailnetDnsName,
-  })
+  let services: TailscaleCachedService[]
+  try {
+    services = await fetchTailscaleServices({
+      clientId,
+      clientSecret,
+      tailnetDnsName,
+    })
+  } catch (error) {
+    logSafeTailscaleError('Credential validation', error)
+    throw new Error(safeSyncError(error))
+  }
   const encrypted = input.clientSecret
     ? await encryptCredential(clientSecret, encryptionKey)
     : {

@@ -1,16 +1,18 @@
 import { z } from 'zod'
 
 const TOKEN_URL = 'https://api.tailscale.com/api/v2/oauth/token'
-const SERVICES_URL = 'https://api.tailscale.com/api/v2/tailnet/-/services'
+const SERVICES_URL = 'https://api.tailscale.com/api/v2/tailnet/-/vip-services'
 const DEFAULT_TIMEOUT_MS = 10_000
 
 const tokenResponseSchema = z.object({ access_token: z.string().min(1) })
-const servicesResponseSchema = z.array(
-  z.object({
-    name: z.string().min(1),
-    ports: z.array(z.string()),
-  }),
-)
+const serviceSchema = z.object({
+  name: z.string().min(1),
+  ports: z.array(z.string()),
+})
+const servicesResponseSchema = z.union([
+  z.array(serviceSchema),
+  z.object({ vipServices: z.array(serviceSchema) }),
+])
 
 export type TailscaleCachedService = {
   id: string
@@ -92,13 +94,16 @@ export function normalizeTailscaleServices(
   if (!parsed.success) {
     throw new Error('Invalid Tailscale Services response')
   }
+  const services = Array.isArray(parsed.data)
+    ? parsed.data
+    : parsed.data.vipServices
   const suffix = normalizeTailnetDnsName(tailnetDnsName)
   const merged = new Map<
     string,
     { name: string; label: string; http: boolean; https: boolean }
   >()
 
-  for (const service of parsed.data) {
+  for (const service of services) {
     const label = service.name.replace(/^svc:/, '').toLowerCase()
     if (!DNS_LABEL.test(label)) continue
     const previous = merged.get(service.name)
