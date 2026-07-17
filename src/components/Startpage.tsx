@@ -1,5 +1,6 @@
 import Fuse from 'fuse.js'
 import { useEffect, useMemo, useState } from 'react'
+import { Badge } from '@/components/ui/badge'
 import AppCard from './AppCard'
 import FeatherIcon from './FeatherIcon'
 
@@ -149,13 +150,11 @@ export default function Startpage({
             className="mb-10 scroll-mt-20"
           >
             <div className="mb-3 flex items-baseline gap-2">
-              <h2 className="m-0 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+              <h2 className="m-0 text-sm font-semibold tracking-wide text-muted-foreground">
                 {category.name}
               </h2>
               {category.visibility === 'auth' ? (
-                <span className="text-[10px] tracking-wide text-muted-foreground uppercase">
-                  private
-                </span>
+                <Badge variant="secondary">private</Badge>
               ) : null}
             </div>
             {category.apps.length === 0 && category.emptyMessage ? (
