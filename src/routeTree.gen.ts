@@ -13,6 +13,7 @@ import { Route as SetupRouteImport } from './routes/setup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiStartpageRouteImport } from './routes/api/startpage'
 
 const SetupRoute = SetupRouteImport.update({
   id: '/setup',
@@ -34,18 +35,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStartpageRoute = ApiStartpageRouteImport.update({
+  id: '/api/startpage',
+  path: '/api/startpage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
+  '/api/startpage': typeof ApiStartpageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
+  '/api/startpage': typeof ApiStartpageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
+  '/api/startpage': typeof ApiStartpageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/login' | '/setup'
+  fullPaths: '/' | '/admin' | '/login' | '/setup' | '/api/startpage'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/login' | '/setup'
-  id: '__root__' | '/' | '/admin' | '/login' | '/setup'
+  to: '/' | '/admin' | '/login' | '/setup' | '/api/startpage'
+  id: '__root__' | '/' | '/admin' | '/login' | '/setup' | '/api/startpage'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   LoginRoute: typeof LoginRoute
   SetupRoute: typeof SetupRoute
+  ApiStartpageRoute: typeof ApiStartpageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/startpage': {
+      id: '/api/startpage'
+      path: '/api/startpage'
+      fullPath: '/api/startpage'
+      preLoaderRoute: typeof ApiStartpageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   LoginRoute: LoginRoute,
   SetupRoute: SetupRoute,
+  ApiStartpageRoute: ApiStartpageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

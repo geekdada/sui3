@@ -3,6 +3,7 @@ import {
   AlertCircle,
   Check,
   CheckCircle,
+  Database,
   Grid,
   Key,
   Lock,
@@ -14,10 +15,13 @@ import {
   Moon,
   MoreVertical,
   Plus,
+  RefreshCw,
   Search,
   Settings,
   Sun,
   Trash2,
+  Wifi,
+  WifiOff,
   X,
 } from 'react-feather'
 
@@ -25,6 +29,7 @@ const icons = {
   AlertCircle,
   Check,
   CheckCircle,
+  Database,
   Grid,
   Key,
   Lock,
@@ -36,10 +41,13 @@ const icons = {
   Moon,
   MoreVertical,
   Plus,
+  RefreshCw,
   Search,
   Settings,
   Sun,
   Trash2,
+  Wifi,
+  WifiOff,
   X,
 } as const
 

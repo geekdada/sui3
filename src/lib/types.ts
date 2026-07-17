@@ -30,6 +30,11 @@ export type AdminCategory = Category & {
   apps: DecoratedApp[]
 }
 
+export type StartpageData = {
+  authenticated: boolean
+  categories: AdminCategory[]
+}
+
 /** Editable app fields shared by the admin add/edit forms. */
 export type AppFormValues = {
   name: string

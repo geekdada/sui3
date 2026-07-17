@@ -3,9 +3,22 @@ import Clock from '#/components/Clock'
 import Sidebar from '#/components/Sidebar'
 import Startpage from '#/components/Startpage'
 import { getStartpageData } from '#/lib/apps.functions'
+import { fetchPublicStartpageData } from '#/lib/public-startpage'
 
 export const Route = createFileRoute('/')({
-  loader: () => getStartpageData(),
+  loader: async ({ abortController, parentMatchPromise }) => {
+    const parentMatch = await parentMatchPromise
+    if (!parentMatch.loaderData) {
+      throw new Error('Root authentication state is unavailable')
+    }
+    const authenticated = parentMatch.loaderData.authenticated
+
+    if (authenticated || typeof window === 'undefined') {
+      return getStartpageData()
+    }
+
+    return fetchPublicStartpageData(abortController.signal)
+  },
   component: HomePage,
 })
 
