@@ -1,4 +1,3 @@
-import { useRouter } from '@tanstack/react-router'
 import {
   startTransition,
   useCallback,
@@ -6,16 +5,8 @@ import {
   useRef,
   useState,
 } from 'react'
-import {
-  CACHE_INSPECT_MESSAGE,
-  SKIP_WAITING_MESSAGE,
-  isCacheActivityMessage,
-  isCacheSnapshotResponse,
-  type CacheActivityMessage,
-  type CacheSnapshotEntry,
-} from '#/lib/service-worker-messages'
-
-const MAX_ACTIVITY = 50
+import { useRouter } from '@tanstack/react-router'
+import { isCacheActivityMessage } from '#/lib/service-worker-messages'
 
 export type WorkerStatus =
   | 'disabled'
@@ -25,35 +16,15 @@ export type WorkerStatus =
   | 'update-available'
   | 'error'
 
-async function inspectWorkerCaches(
-  registration: ServiceWorkerRegistration | null,
-): Promise<CacheSnapshotEntry[]> {
-  const worker = navigator.serviceWorker.controller ?? registration?.active
-  if (!worker) return []
-
-  return new Promise((resolve) => {
-    const channel = new MessageChannel()
-    const timeout = window.setTimeout(() => resolve([]), 2_000)
-    channel.port1.onmessage = (event: MessageEvent<unknown>) => {
-      window.clearTimeout(timeout)
-      resolve(isCacheSnapshotResponse(event.data) ? event.data.entries : [])
-    }
-    worker.postMessage({ type: CACHE_INSPECT_MESSAGE }, [channel.port2])
-  })
-}
-
-export function useServiceWorkerCache(authenticated: boolean) {
+export function useServiceWorker(authenticated: boolean) {
   const router = useRouter()
   const [online, setOnline] = useState(true)
   const [status, setStatus] = useState<WorkerStatus>('registering')
-  const [activities, setActivities] = useState<CacheActivityMessage[]>([])
-  const [cacheEntries, setCacheEntries] = useState<CacheSnapshotEntry[]>([])
   const [error, setError] = useState<string | null>(null)
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null)
   const authenticatedRef = useRef(authenticated)
-  const reloadOnControllerChangeRef = useRef(false)
-  const refreshedEventIdsRef = useRef(new Set<string>())
   const primedAnonymousDataRef = useRef(false)
+  const refreshedEventIdsRef = useRef(new Set<string>())
 
   const refreshData = useCallback(() => {
     startTransition(() => {
@@ -89,20 +60,13 @@ export function useServiceWorkerCache(authenticated: boolean) {
       primedAnonymousDataRef.current = true
       refreshData()
     }
+
     const onOnline = () => setOnline(true)
     const onOffline = () => setOnline(false)
-    const onControllerChange = () => {
-      if (reloadOnControllerChangeRef.current) {
-        window.location.reload()
-        return
-      }
-      primeAnonymousData()
-    }
+    const onControllerChange = () => primeAnonymousData()
     const onMessage = (event: MessageEvent<unknown>) => {
       if (!isCacheActivityMessage(event.data)) return
       const activity = event.data
-      setActivities((current) => [activity, ...current].slice(0, MAX_ACTIVITY))
-
       if (
         activity.kind === 'updated' &&
         !authenticatedRef.current &&
@@ -171,27 +135,5 @@ export function useServiceWorkerCache(authenticated: boolean) {
     }
   }, [refreshData])
 
-  const inspectCaches = useCallback(async () => {
-    const entries = await inspectWorkerCaches(registrationRef.current)
-    setCacheEntries(entries)
-  }, [])
-
-  const applyUpdate = useCallback(() => {
-    const waiting = registrationRef.current?.waiting
-    if (!waiting) return
-    reloadOnControllerChangeRef.current = true
-    waiting.postMessage({ type: SKIP_WAITING_MESSAGE })
-  }, [])
-
-  return {
-    activities,
-    applyUpdate,
-    cacheEntries,
-    clearActivities: () => setActivities([]),
-    error,
-    inspectCaches,
-    online,
-    refreshData,
-    status,
-  }
+  return { error, online, registrationRef, status }
 }

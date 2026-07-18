@@ -1,8 +1,8 @@
 import { Link, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { logoutFn } from '#/lib/auth.functions'
-import CacheActivity from './CacheActivity'
 import FeatherIcon from './FeatherIcon'
+import ServiceWorkerUpdate from './ServiceWorkerUpdate'
 import ThemeToggle from './ThemeToggle'
 
 const ACTION_CLASS =
@@ -53,11 +53,8 @@ export default function Header({
               <span className="hidden sm:inline">Setup</span>
             </Link>
           )}
-          <CacheActivity
-            authenticated={authenticated}
-            className={ACTION_CLASS}
-          />
           <ThemeToggle />
+          <ServiceWorkerUpdate />
         </div>
       </nav>
     </header>
