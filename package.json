@@ -9,11 +9,12 @@
     "dev": "vite dev --port 8333",
     "generate-routes": "tsr generate",
     "build": "vite build",
+    "build:production": "SUI3_WRANGLER_CONFIG=wrangler.production.jsonc vite build",
     "preview": "vite preview",
-    "deploy": "pnpm run build && wrangler deploy",
+    "deploy": "pnpm run build:production && wrangler deploy",
     "cf-typegen": "wrangler types",
     "db:migrate:local": "wrangler d1 migrations apply sui3 --local",
-    "db:migrate:remote": "wrangler d1 migrations apply sui3 --remote",
+    "db:migrate:remote": "wrangler d1 migrations apply sui3 --config wrangler.production.jsonc --remote",
     "test": "vitest run"
   },
   "dependencies": {

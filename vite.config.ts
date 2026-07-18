@@ -38,19 +38,24 @@ const finalizeServiceWorker: Plugin = {
   },
 }
 
-const config = defineConfig({
-  resolve: { tsconfigPaths: true },
-  plugins: [
-    cloudflare({
-      configPath: 'wrangler.development.jsonc',
-      viteEnvironment: { name: 'ssr' },
-    }),
-    tailwindcss(),
-    tanstackStart(),
-    ...pwaPlugins,
-    finalizeServiceWorker,
-    viteReact(),
-  ],
+const config = defineConfig(() => {
+  const wranglerConfigPath =
+    process.env.SUI3_WRANGLER_CONFIG ?? 'wrangler.development.jsonc'
+
+  return {
+    resolve: { tsconfigPaths: true },
+    plugins: [
+      cloudflare({
+        configPath: wranglerConfigPath,
+        viteEnvironment: { name: 'ssr' },
+      }),
+      tailwindcss(),
+      tanstackStart(),
+      ...pwaPlugins,
+      finalizeServiceWorker,
+      viteReact(),
+    ],
+  }
 })
 
 export default config
