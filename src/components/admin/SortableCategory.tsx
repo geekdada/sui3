@@ -16,6 +16,7 @@ import type {
 import { CompactFormField } from '#/components/FormField'
 import { ToggleGroup, ToggleGroupItem } from '#/components/ui/toggle-group'
 import { appFormSchema } from '#/lib/form-schemas'
+import { Button } from '../ui/button'
 import FeatherIcon from '../FeatherIcon'
 import SortableAppRow from './SortableAppRow'
 
@@ -38,15 +39,21 @@ export default function SortableCategory({
   onRename: (cat: AdminCategory, name: string) => Promise<boolean>
   onVisibility: (
     cat: AdminCategory,
-    visibility: CategoryVisibility,
+    visibility: CategoryVisibility
   ) => Promise<boolean>
   onDelete: (cat: AdminCategory) => Promise<boolean>
   onAddApp: (categoryId: string, values: AppFormValues) => Promise<boolean>
   onEditApp: (app: DecoratedApp, values: AppFormValues) => Promise<boolean>
   onDeleteApp: (app: DecoratedApp) => Promise<boolean>
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: category.id, data: { type: 'category' } })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: category.id, data: { type: 'category' } })
   const [name, setName] = useState(category.name)
   const [visibility, setVisibility] = useState(category.visibility)
   const [adding, setAdding] = useState(false)
@@ -104,7 +111,7 @@ export default function SortableCategory({
       style={style}
       className={cn(
         'scroll-mt-20 rounded-lg border border-border bg-card',
-        isDragging && 'opacity-40',
+        isDragging && 'opacity-40'
       )}
     >
       <header className="flex items-center gap-2 border-b border-border px-2 py-2">
@@ -143,14 +150,16 @@ export default function SortableCategory({
           <ToggleGroupItem value="public">public</ToggleGroupItem>
           <ToggleGroupItem value="auth">private</ToggleGroupItem>
         </ToggleGroup>
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="sm"
           onClick={() => onDelete(category)}
           className={cn(iconBtnClass, 'hover:border-match hover:text-match')}
           aria-label="Delete category"
         >
           <FeatherIcon name="Trash2" size={16} />
-        </button>
+        </Button>
       </header>
 
       <div className="p-2">
@@ -226,11 +235,7 @@ export default function SortableCategory({
                 />
               )}
             </form.Field>
-            <button
-              type="submit"
-              className={iconBtnClass}
-              aria-label="Add app"
-            >
+            <button type="submit" className={iconBtnClass} aria-label="Add app">
               <FeatherIcon name="Check" size={16} />
             </button>
             <button

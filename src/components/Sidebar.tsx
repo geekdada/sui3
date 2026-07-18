@@ -8,6 +8,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '#/components/ui/drawer'
+import { Button } from './ui/button'
 import FeatherIcon from './FeatherIcon'
 
 const ALL = 'all'
@@ -80,25 +81,29 @@ function CategoryNav({
       </p>
       <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
         <li>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => onJump(ALL)}
             className={cn(
-              'flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition hover:bg-background hover:text-foreground',
+              'w-full justify-between px-2 py-1.5 text-muted-foreground hover:text-foreground',
               active === ALL && 'bg-background font-medium text-foreground'
             )}
           >
             <span>All</span>
             <span className="font-mono text-xs tabular-nums">{total}</span>
-          </button>
+          </Button>
         </li>
         {categories.map((category) => (
           <li key={category.id}>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => onJump(category.id)}
               className={cn(
-                'flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition hover:bg-background hover:text-foreground',
+                'w-full justify-between gap-2 px-2 py-1.5 text-muted-foreground hover:text-foreground',
                 active === category.id &&
                   'bg-background font-medium text-foreground'
               )}
@@ -116,7 +121,7 @@ function CategoryNav({
               <span className="font-mono text-xs tabular-nums">
                 {category.apps.length}
               </span>
-            </button>
+            </Button>
           </li>
         ))}
       </ul>

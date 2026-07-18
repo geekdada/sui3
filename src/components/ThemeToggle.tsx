@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import FeatherIcon from './FeatherIcon'
+import { Button } from './ui/button'
 
 const modes = ['light', 'dark', 'auto'] as const
 type Mode = (typeof modes)[number]
@@ -35,9 +36,10 @@ export default function ThemeToggle() {
   }, [])
 
   return (
-    <button
+    <Button
       type="button"
-      className="inline-flex items-center justify-center rounded-md border border-border bg-card p-2 text-muted-foreground transition hover:border-primary hover:text-foreground"
+      size="sm"
+      variant="outline"
       onClick={() => {
         const idx = modes.indexOf(mode)
         const next = modes[(idx + 1) % modes.length]
@@ -49,6 +51,6 @@ export default function ThemeToggle() {
       title={`Theme: ${mode}`}
     >
       <FeatherIcon name={iconFor(mode)} size={15} />
-    </button>
+    </Button>
   )
 }

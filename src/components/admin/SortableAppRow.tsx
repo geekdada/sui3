@@ -6,6 +6,7 @@ import { cn } from '#/lib/cn'
 import type { AppFormValues, DecoratedApp } from '#/lib/types'
 import { CompactFormField } from '#/components/FormField'
 import { appFormSchema } from '#/lib/form-schemas'
+import { Button } from '../ui/button'
 import AppIcon from '../AppIcon'
 import FeatherIcon from '../FeatherIcon'
 
@@ -22,8 +23,14 @@ export default function SortableAppRow({
   onEdit: (app: DecoratedApp, values: AppFormValues) => Promise<boolean>
   onDelete: (app: DecoratedApp) => Promise<boolean>
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: app.id, data: { type: 'app' } })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: app.id, data: { type: 'app' } })
 
   const [editing, setEditing] = useState(false)
 
@@ -70,18 +77,20 @@ export default function SortableAppRow({
       style={style}
       className={cn(
         'flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1.5',
-        isDragging && 'opacity-40',
+        isDragging && 'opacity-40'
       )}
     >
-      <button
+      <Button
         type="button"
-        className="shrink-0 cursor-grab touch-none text-muted-foreground transition hover:text-foreground active:cursor-grabbing"
+        variant="ghost"
+        size="icon-xs"
+        className="shrink-0 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
         aria-label="Drag app"
         {...attributes}
         {...listeners}
       >
         <FeatherIcon name="MoreVertical" size={16} />
-      </button>
+      </Button>
 
       {editing ? (
         <form
@@ -119,6 +128,7 @@ export default function SortableAppRow({
                 className="min-w-0 flex-1"
                 inputProps={{
                   placeholder: 'Name',
+                  autoFocus: true,
                   className: inputBaseClass,
                 }}
               />
@@ -137,44 +147,50 @@ export default function SortableAppRow({
               />
             )}
           </form.Field>
-          <button
+          <Button
             type="submit"
+            variant="outline"
             className={iconBtnClass}
             aria-label="Save app"
           >
             <FeatherIcon name="Check" size={16} />
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="outline"
             onClick={cancel}
             className={iconBtnClass}
             aria-label="Cancel edit"
           >
             <FeatherIcon name="X" size={16} />
-          </button>
+          </Button>
         </form>
       ) : (
         <>
           <AppIcon icon={app.icon} className="text-muted-foreground" />
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => setEditing(true)}
-            className="flex min-w-0 flex-1 items-baseline gap-2 text-left"
+            className="flex min-w-0 flex-1 items-center justify-start gap-2 text-left"
             title="Edit"
           >
             <span className="truncate text-sm font-medium">{app.name}</span>
             <span className="truncate font-mono text-xs text-muted-foreground">
               {app.domain}
             </span>
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => onDelete(app)}
             className={cn(iconBtnClass, 'hover:border-match hover:text-match')}
             aria-label="Delete app"
           >
             <FeatherIcon name="Trash2" size={16} />
-          </button>
+          </Button>
         </>
       )}
     </li>

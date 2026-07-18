@@ -4,9 +4,7 @@ import { logoutFn } from '#/lib/auth.functions'
 import FeatherIcon from './FeatherIcon'
 import ServiceWorkerUpdate from './ServiceWorkerUpdate'
 import ThemeToggle from './ThemeToggle'
-
-const ACTION_CLASS =
-  'inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-muted-foreground no-underline transition hover:border-primary hover:text-foreground'
+import { Button, buttonVariants } from './ui/button'
 
 export default function Header({
   authenticated,
@@ -30,9 +28,9 @@ export default function Header({
         </Link>
         <div className="ml-auto flex items-center gap-2 text-sm">
           {authenticated ? (
-            <button
-              type="button"
-              className={ACTION_CLASS}
+            <Button
+              variant="outline"
+              size="sm"
               onClick={async () => {
                 await logout()
                 await router.invalidate()
@@ -41,14 +39,20 @@ export default function Header({
             >
               <FeatherIcon name="LogOut" size={15} />
               <span className="hidden sm:inline">Log out</span>
-            </button>
+            </Button>
           ) : enrolled ? (
-            <Link to="/login" className={ACTION_CLASS}>
+            <Link
+              to="/login"
+              className={buttonVariants({ variant: 'outline', size: 'sm' })}
+            >
               <FeatherIcon name="LogIn" size={15} />
               <span className="hidden sm:inline">Log in</span>
             </Link>
           ) : (
-            <Link to="/setup" className={ACTION_CLASS}>
+            <Link
+              to="/setup"
+              className={buttonVariants({ variant: 'outline', size: 'sm' })}
+            >
               <FeatherIcon name="Key" size={15} />
               <span className="hidden sm:inline">Setup</span>
             </Link>
