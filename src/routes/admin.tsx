@@ -25,7 +25,7 @@ function AdminPage() {
   return (
     <div className="flex">
       <Sidebar categories={data.categories} authenticated />
-      <main className="min-w-0 flex-1 px-4 py-6 sm:px-6">
+      <main className="min-w-0 flex-1 px-4 py-6 pb-24 sm:px-6 md:pb-6">
         <h1 className="mb-6 text-xl font-semibold tracking-tight">Admin</h1>
         <AdminEditor categories={data.categories} />
         <TailscaleSettingsPanel settings={data.tailscale} />

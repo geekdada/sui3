@@ -1,5 +1,5 @@
 import Fuse from 'fuse.js'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import AppCard from './AppCard'
 import FeatherIcon from './FeatherIcon'
@@ -9,7 +9,6 @@ export type StartpageApp = {
   name: string
   url: string
   icon: string
-  iconSvg: string
   domain: string
 }
 
@@ -34,6 +33,7 @@ export default function Startpage({
   const [keyword, setKeyword] = useState('')
   const [matchedIds, setMatchedIds] = useState<string[]>([])
   const [highlights, setHighlights] = useState<Record<string, string>>({})
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const flat = useMemo(
     () =>
@@ -114,7 +114,7 @@ export default function Startpage({
     }
     setHighlights(nextHighlights)
 
-    if (ids[0]) {
+    if (ids[0] && document.activeElement !== inputRef.current) {
       const el = document.querySelector<HTMLElement>(
         `[data-app-id="${ids[0]}"]`,
       )
@@ -129,6 +129,7 @@ export default function Startpage({
           <FeatherIcon name="Search" size={15} />
         </span>
         <input
+          ref={inputRef}
           type="text"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}

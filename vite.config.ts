@@ -12,20 +12,13 @@ const pwaPlugins = VitePWA({
   filename: 'sw.ts',
   injectRegister: null,
   manifest: false,
-  includeAssets: [
-    'favicon.ico',
-    'logo192.png',
-    'logo512.png',
-    'manifest.json',
-  ],
+  includeAssets: ['favicon.ico', 'logo192.png', 'logo512.png', 'manifest.json'],
   injectManifest: {
     globPatterns: ['**/*.{js,css,woff2,png,ico,json}'],
   },
 })
 
-const pwaApi = (
-  pwaPlugins[0] as Plugin & { api: VitePluginPWAAPI }
-).api
+const pwaApi = (pwaPlugins[0] as Plugin & { api: VitePluginPWAAPI }).api
 let serviceWorkerGenerated = false
 
 // Cloudflare's Vite environment build resolves the shared PWA plugin against
@@ -48,7 +41,10 @@ const finalizeServiceWorker: Plugin = {
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
   plugins: [
-    cloudflare({ viteEnvironment: { name: 'ssr' } }),
+    cloudflare({
+      configPath: 'wrangler.development.jsonc',
+      viteEnvironment: { name: 'ssr' },
+    }),
     tailwindcss(),
     tanstackStart(),
     ...pwaPlugins,
