@@ -1,4 +1,5 @@
 import { cn } from '#/lib/cn'
+import AppIcon from './AppIcon'
 import type { StartpageApp } from './Startpage'
 
 export default function AppCard({
@@ -21,7 +22,7 @@ export default function AppCard({
       rel="noreferrer"
       tabIndex={tabIndex}
       className={cn(
-        'app-card flex flex-col gap-2 rounded-lg border border-border bg-card p-3 text-foreground no-underline transition hover:border-primary',
+        'app-card flex flex-col gap-2 rounded-lg border border-border bg-card p-3 text-foreground no-underline transition hover:border-primary hover:bg-secondary/60',
         matched && 'matched',
       )}
     >
@@ -30,10 +31,7 @@ export default function AppCard({
       </span>
 
       <span className="flex items-center gap-2">
-        <span
-          className="shrink-0 text-muted-foreground [&_svg]:block [&_svg]:h-4 [&_svg]:w-4"
-          dangerouslySetInnerHTML={{ __html: app.iconSvg }}
-        />
+        <AppIcon icon={app.icon} className="text-muted-foreground" />
         <span
           className="min-w-0 flex-1 truncate text-sm font-semibold"
           dangerouslySetInnerHTML={{ __html: label }}

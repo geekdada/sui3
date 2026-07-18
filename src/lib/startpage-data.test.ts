@@ -54,7 +54,7 @@ describe('startpage private integrations', () => {
     ])
   })
 
-  it('appends the private Tailscale category for authenticated requests', async () => {
+  it('prepends the private Tailscale category for authenticated requests', async () => {
     mocks.getTailscaleStartpageCategory.mockResolvedValue({
       id: 'integration:tailscale-services',
       name: 'Tailscale Services',
@@ -68,8 +68,8 @@ describe('startpage private integrations', () => {
     expect(mocks.listCategoriesWithApps).toHaveBeenCalledWith(true)
     expect(mocks.getTailscaleStartpageCategory).toHaveBeenCalledOnce()
     expect(result.categories.map((category) => category.name)).toEqual([
-      'Public',
       'Tailscale Services',
+      'Public',
     ])
   })
 })

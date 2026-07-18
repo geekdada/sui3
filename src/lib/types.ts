@@ -20,9 +20,9 @@ export type CategoryWithApps = Category & {
   apps: AppItem[]
 }
 
-/** App decorated with a rendered icon SVG and display domain (loader output). */
+/** App decorated with a display domain (loader output); the icon is rendered
+ * from `icon` via the `/api/icon/:name` endpoint. */
 export type DecoratedApp = AppItem & {
-  iconSvg: string
   domain: string
 }
 

@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiStartpageRouteImport } from './routes/api/startpage'
+import { Route as ApiIconNameRouteImport } from './routes/api/icon.$name'
 
 const SetupRoute = SetupRouteImport.update({
   id: '/setup',
@@ -40,6 +41,11 @@ const ApiStartpageRoute = ApiStartpageRouteImport.update({
   path: '/api/startpage',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiIconNameRoute = ApiIconNameRouteImport.update({
+  id: '/api/icon/$name',
+  path: '/api/icon/$name',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
   '/api/startpage': typeof ApiStartpageRoute
+  '/api/icon/$name': typeof ApiIconNameRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
   '/api/startpage': typeof ApiStartpageRoute
+  '/api/icon/$name': typeof ApiIconNameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,23 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
   '/api/startpage': typeof ApiStartpageRoute
+  '/api/icon/$name': typeof ApiIconNameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/login' | '/setup' | '/api/startpage'
+  fullPaths:
+    '/' | '/admin' | '/login' | '/setup' | '/api/startpage' | '/api/icon/$name'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/login' | '/setup' | '/api/startpage'
-  id: '__root__' | '/' | '/admin' | '/login' | '/setup' | '/api/startpage'
+  to:
+    '/' | '/admin' | '/login' | '/setup' | '/api/startpage' | '/api/icon/$name'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/setup'
+    | '/api/startpage'
+    | '/api/icon/$name'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +95,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SetupRoute: typeof SetupRoute
   ApiStartpageRoute: typeof ApiStartpageRoute
+  ApiIconNameRoute: typeof ApiIconNameRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +135,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStartpageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/icon/$name': {
+      id: '/api/icon/$name'
+      path: '/api/icon/$name'
+      fullPath: '/api/icon/$name'
+      preLoaderRoute: typeof ApiIconNameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +151,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SetupRoute: SetupRoute,
   ApiStartpageRoute: ApiStartpageRoute,
+  ApiIconNameRoute: ApiIconNameRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

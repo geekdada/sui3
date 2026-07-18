@@ -16,15 +16,14 @@ import {
   optionalAuthMiddleware,
   requireAuthMiddleware,
 } from '#/lib/auth-middleware'
-import { domainFromUrl, getAppIconSvg } from '#/lib/icons'
+import { domainFromUrl } from '#/lib/icons'
 import { loadStartpageData } from '#/lib/startpage-data'
 import type { AppItem, DecoratedApp } from '#/lib/types'
 
-/** Attach the rendered icon SVG and display domain to a raw app row. */
+/** Attach the display domain to a raw app row. */
 function decorateApp(app: AppItem): DecoratedApp {
   return {
     ...app,
-    iconSvg: getAppIconSvg(app.icon),
     domain: domainFromUrl(app.url),
   }
 }

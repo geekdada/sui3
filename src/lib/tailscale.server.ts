@@ -4,7 +4,7 @@ import {
   encryptCredential,
 } from '#/lib/credential-crypto'
 import { getCredentialEncryptionKey, getDb } from '#/lib/env'
-import { domainFromUrl, getAppIconSvg } from '#/lib/icons'
+import { domainFromUrl } from '#/lib/icons'
 import { TAILNET_DNS_DISCOVERY_ERROR_CODE } from '#/lib/tailscale-errors'
 import {
   fetchTailscaleServicesSnapshot,
@@ -284,7 +284,6 @@ export async function getTailscaleStartpageCategory() {
       url: service.url,
       icon: 'server',
       sort_order: index,
-      iconSvg: getAppIconSvg('server'),
       domain: domainFromUrl(service.url),
     })),
   }
