@@ -1,12 +1,15 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useState } from 'react'
+import { useForm } from '@tanstack/react-form'
+import { useEffect, useState } from 'react'
 import { cn } from '#/lib/cn'
 import type { AppFormValues, DecoratedApp } from '#/lib/types'
+import { CompactFormField } from '#/components/FormField'
+import { appFormSchema } from '#/lib/form-schemas'
+import AppIcon from '../AppIcon'
 import FeatherIcon from '../FeatherIcon'
 
-const inputClass =
-  'min-w-0 rounded-md border border-border bg-card px-2 py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary'
+const inputBaseClass = 'h-8 px-2.5 py-1 text-sm'
 const iconBtnClass =
   'inline-flex shrink-0 items-center justify-center rounded-md border border-border bg-card p-1.5 text-muted-foreground transition hover:border-primary hover:text-foreground'
 
@@ -21,30 +24,43 @@ export default function SortableAppRow({
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: app.id, data: { type: 'app' } })
+
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState<AppFormValues>({
-    name: app.name,
-    url: app.url,
-    icon: app.icon,
+
+  const form = useForm({
+    defaultValues: {
+      name: app.name,
+      url: app.url,
+      icon: app.icon,
+    },
+    validators: {
+      onChange: appFormSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const ok = await onEdit(app, {
+        name: value.name.trim(),
+        url: value.url.trim(),
+        icon: value.icon.trim(),
+      })
+      if (ok) {
+        setEditing(false)
+      } else {
+        form.reset()
+      }
+    },
   })
+
+  useEffect(() => {
+    if (!editing) form.reset()
+  }, [app.name, app.url, app.icon, editing, form])
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   }
 
-  async function save() {
-    if (!form.name.trim() || !form.url.trim() || !form.icon.trim()) return
-    const ok = await onEdit(app, {
-      name: form.name.trim(),
-      url: form.url.trim(),
-      icon: form.icon.trim(),
-    })
-    if (ok) setEditing(false)
-  }
-
   function cancel() {
-    setForm({ name: app.name, url: app.url, icon: app.icon })
+    form.reset()
     setEditing(false)
   }
 
@@ -67,37 +83,62 @@ export default function SortableAppRow({
         <FeatherIcon name="MoreVertical" size={16} />
       </button>
 
-      <span
-        className="shrink-0 text-muted-foreground [&_svg]:block [&_svg]:h-4 [&_svg]:w-4"
-        dangerouslySetInnerHTML={{ __html: app.iconSvg }}
-      />
-
       {editing ? (
-        <>
-          <input
-            value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            placeholder="Name"
-            className={cn(inputClass, 'w-32 flex-1')}
-            aria-label="App name"
-          />
-          <input
-            value={form.url}
-            onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
-            placeholder="URL"
-            className={cn(inputClass, 'w-40 flex-[2]')}
-            aria-label="App URL"
-          />
-          <input
-            value={form.icon}
-            onChange={(e) => setForm((f) => ({ ...f, icon: e.target.value }))}
-            placeholder="icon"
-            className={cn(inputClass, 'w-20')}
-            aria-label="App icon"
-          />
+        <form
+          onSubmit={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            void form.handleSubmit()
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              event.preventDefault()
+              cancel()
+            }
+          }}
+          className="flex min-w-0 flex-1 items-start gap-2"
+        >
+          <form.Field name="icon">
+            {(field) => (
+              <CompactFormField
+                field={field}
+                label="App icon"
+                className="w-20 shrink-0"
+                inputProps={{
+                  placeholder: 'Icon',
+                  className: inputBaseClass,
+                }}
+              />
+            )}
+          </form.Field>
+          <form.Field name="name">
+            {(field) => (
+              <CompactFormField
+                field={field}
+                label="App name"
+                className="min-w-0 flex-1"
+                inputProps={{
+                  placeholder: 'Name',
+                  className: inputBaseClass,
+                }}
+              />
+            )}
+          </form.Field>
+          <form.Field name="url">
+            {(field) => (
+              <CompactFormField
+                field={field}
+                label="App URL"
+                className="min-w-0 flex-[2]"
+                inputProps={{
+                  placeholder: 'URL',
+                  className: inputBaseClass,
+                }}
+              />
+            )}
+          </form.Field>
           <button
-            type="button"
-            onClick={save}
+            type="submit"
             className={iconBtnClass}
             aria-label="Save app"
           >
@@ -111,9 +152,10 @@ export default function SortableAppRow({
           >
             <FeatherIcon name="X" size={16} />
           </button>
-        </>
+        </form>
       ) : (
         <>
+          <AppIcon icon={app.icon} className="text-muted-foreground" />
           <button
             type="button"
             onClick={() => setEditing(true)}

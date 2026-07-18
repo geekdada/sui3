@@ -40,6 +40,8 @@ import type {
   CategoryVisibility,
   DecoratedApp,
 } from '#/lib/types'
+import AppIcon from '../AppIcon'
+import { useConfirmDialog } from '../ConfirmDialog'
 import FeatherIcon from '../FeatherIcon'
 import SortableCategory from './SortableCategory'
 
@@ -52,6 +54,8 @@ export default function AdminEditor({
   categories: AdminCategory[]
 }) {
   const router = useRouter()
+  const { confirm: confirmDialog, dialog: confirmDialogElement } =
+    useConfirmDialog()
   const reorder = useServerFn(reorderLayoutFn)
   const createCategory = useServerFn(createCategoryFn)
   const updateCategory = useServerFn(updateCategoryFn)
@@ -312,8 +316,14 @@ export default function AdminEditor({
       }),
     )
 
-  const deleteCategory = (cat: AdminCategory) => {
-    if (!confirm(`Delete “${cat.name}” and its apps?`)) return Promise.resolve(false)
+  const deleteCategory = async (cat: AdminCategory) => {
+    const ok = await confirmDialog({
+      title: 'Delete category',
+      description: `Delete “${cat.name}” and all of its apps? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      destructive: true,
+    })
+    if (!ok) return false
     return run(() => removeCategory({ data: { id: cat.id } }))
   }
 
@@ -332,8 +342,16 @@ export default function AdminEditor({
       }),
     )
 
-  const deleteApp = (app: DecoratedApp) =>
-    run(() => removeApp({ data: { id: app.id } }))
+  const deleteApp = async (app: DecoratedApp) => {
+    const ok = await confirmDialog({
+      title: 'Delete app',
+      description: `Delete app “${app.name}”? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      destructive: true,
+    })
+    if (!ok) return false
+    return run(() => removeApp({ data: { id: app.id } }))
+  }
 
   const [addingCat, setAddingCat] = useState(false)
   const [newCatName, setNewCatName] = useState('')
@@ -363,6 +381,7 @@ export default function AdminEditor({
   return (
     <div>
       {error ? <p className="mb-3 text-sm text-match">{error}</p> : null}
+      {confirmDialogElement}
 
       <DndContext
         id="admin-editor-dnd"
@@ -400,10 +419,7 @@ export default function AdminEditor({
             </div>
           ) : activeApp ? (
             <div className="flex items-center gap-2 rounded-md border border-primary bg-card px-2 py-1.5 shadow-lg">
-              <span
-                className="shrink-0 text-muted-foreground [&_svg]:block [&_svg]:h-4 [&_svg]:w-4"
-                dangerouslySetInnerHTML={{ __html: activeApp.iconSvg }}
-              />
+              <AppIcon icon={activeApp.icon} className="text-muted-foreground" />
               <span className="text-sm font-medium">{activeApp.name}</span>
             </div>
           ) : null}

@@ -1,17 +1,13 @@
+import { useForm } from '@tanstack/react-form'
 import { useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState } from 'react'
+import { useConfirmDialog } from '#/components/ConfirmDialog'
+import { FormField } from '#/components/FormField'
 import FeatherIcon from '#/components/FeatherIcon'
 import { Alert, AlertDescription } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-  FieldSet,
-} from '#/components/ui/field'
-import { Input } from '#/components/ui/input'
+import { FieldGroup, FieldSet } from '#/components/ui/field'
 import { Separator } from '#/components/ui/separator'
 import { Spinner } from '#/components/ui/spinner'
 import {
@@ -19,6 +15,7 @@ import {
   refreshTailscaleServicesFn,
   saveTailscaleSettingsFn,
 } from '#/lib/tailscale.functions'
+import { tailscaleSettingsSchema } from '#/lib/form-schemas'
 import { getTailnetDnsDiscoveryErrorMessage } from '#/lib/tailscale-errors'
 import type { TailscaleSettingsSummary } from '#/lib/tailscale-service'
 
@@ -39,18 +36,55 @@ export default function TailscaleSettingsPanel({
   const saveSettings = useServerFn(saveTailscaleSettingsFn)
   const refreshServices = useServerFn(refreshTailscaleServicesFn)
   const deleteSettings = useServerFn(deleteTailscaleSettingsFn)
-  const [clientId, setClientId] = useState(settings.clientId)
-  const [clientSecret, setClientSecret] = useState('')
-  const [tailnetDnsNameFallback, setTailnetDnsNameFallback] = useState('')
+  const { confirm: confirmDialog, dialog: confirmDialogElement } =
+    useConfirmDialog()
+
+  const [pending, setPending] = useState<PendingAction | null>(null)
+  const [notice, setNotice] = useState<Notice | null>(null)
   const [showTailnetFallback, setShowTailnetFallback] = useState(
     getTailnetDnsDiscoveryErrorMessage(settings.lastSyncError ?? '') !== null,
   )
-  const [pending, setPending] = useState<PendingAction | null>(null)
-  const [notice, setNotice] = useState<Notice | null>(null)
+
+  const form = useForm({
+    defaultValues: {
+      clientId: settings.clientId,
+      clientSecret: '',
+      tailnetDnsNameFallback: '',
+    },
+    validators: {
+      onChange: tailscaleSettingsSchema,
+      onSubmit: ({ value }) => {
+        if (!settings.configured && !value.clientSecret?.trim()) {
+          return {
+            form: 'Please fill in all required fields',
+            fields: {
+              clientSecret: 'Client secret is required for initial setup',
+            },
+          }
+        }
+        return undefined
+      },
+    },
+    onSubmit: async ({ value }) => {
+      await run(
+        'save',
+        () =>
+          saveSettings({
+            data: {
+              clientId: value.clientId.trim(),
+              clientSecret: value.clientSecret?.trim() || undefined,
+              tailnetDnsNameFallback:
+                value.tailnetDnsNameFallback?.trim() || undefined,
+            },
+          }),
+        'Credentials verified and services refreshed.',
+      )
+    },
+  })
 
   useEffect(() => {
-    setClientId(settings.clientId)
-  }, [settings.clientId])
+    form.setFieldValue('clientId', settings.clientId)
+  }, [settings.clientId, form])
 
   async function run(
     action: PendingAction,
@@ -62,8 +96,7 @@ export default function TailscaleSettingsPanel({
     try {
       await operation()
       if (action === 'save') {
-        setClientSecret('')
-        setTailnetDnsNameFallback('')
+        form.reset()
         setShowTailnetFallback(false)
       }
       await router.invalidate()
@@ -84,31 +117,20 @@ export default function TailscaleSettingsPanel({
     }
   }
 
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    void run(
-      'save',
-      () =>
-        saveSettings({
-          data: {
-            clientId,
-            clientSecret: clientSecret || undefined,
-            tailnetDnsNameFallback: tailnetDnsNameFallback || undefined,
-          },
-        }),
-      'Credentials verified and services refreshed.',
-    )
-  }
-
-  function disconnect() {
-    if (!confirm('Disconnect Tailscale and remove the cached services?')) return
+  async function disconnect() {
+    const ok = await confirmDialog({
+      title: 'Disconnect Tailscale',
+      description:
+        'Disconnect Tailscale and remove the cached services? This cannot be undone.',
+      confirmLabel: 'Disconnect',
+      destructive: true,
+    })
+    if (!ok) return
     void run(
       'disconnect',
       async () => {
         await deleteSettings()
-        setClientId('')
-        setClientSecret('')
-        setTailnetDnsNameFallback('')
+        form.reset()
         setShowTailnetFallback(false)
       },
       'Tailscale disconnected.',
@@ -135,70 +157,78 @@ export default function TailscaleSettingsPanel({
         </span>
       </div>
 
-      <form onSubmit={submit} className="flex max-w-2xl flex-col gap-5">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          void form.handleSubmit()
+        }}
+        className="flex max-w-2xl flex-col gap-5"
+      >
         <FieldSet disabled={pending !== null}>
           <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="tailscale-client-id">Client ID</FieldLabel>
-              <Input
-                id="tailscale-client-id"
-                value={clientId}
-                onChange={(event) => setClientId(event.target.value)}
-                autoComplete="off"
-                required
-              />
-            </Field>
+            <form.Field name="clientId">
+              {(field) => (
+                <FormField
+                  field={field}
+                  label="Client ID"
+                  inputProps={{
+                    id: 'tailscale-client-id',
+                    autoComplete: 'off',
+                    className: 'h-9',
+                  }}
+                />
+              )}
+            </form.Field>
 
-            <Field>
-              <FieldLabel htmlFor="tailscale-client-secret">
-                Client secret
-              </FieldLabel>
-              <Input
-                id="tailscale-client-secret"
-                type="password"
-                value={clientSecret}
-                onChange={(event) => setClientSecret(event.target.value)}
-                autoComplete="new-password"
-                required={!settings.configured}
-                placeholder={
-                  settings.configured
-                    ? 'Leave blank to keep the current secret'
-                    : undefined
-                }
-              />
-              <FieldDescription>
-                Stored encrypted. Create the OAuth client with the{' '}
-                <a
-                  href="https://tailscale.com/docs/reference/trust-credentials"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  all:read scope
-                </a>
-                . The tailnet DNS name is discovered automatically from an
-                internal device.
-              </FieldDescription>
-            </Field>
+            <form.Field name="clientSecret">
+              {(field) => (
+                <FormField
+                  field={field}
+                  label="Client secret"
+                  description={
+                    <>
+                      Stored encrypted. Create the OAuth client with the{' '}
+                      <a
+                        href="https://tailscale.com/docs/reference/trust-credentials"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        all:read scope
+                      </a>
+                      . The tailnet DNS name is discovered automatically from an
+                      internal device.
+                    </>
+                  }
+                  inputProps={{
+                    id: 'tailscale-client-secret',
+                    type: 'password',
+                    autoComplete: 'new-password',
+                    placeholder: settings.configured
+                      ? 'Leave blank to keep the current secret'
+                      : undefined,
+                    className: 'h-9',
+                  }}
+                />
+              )}
+            </form.Field>
 
             {showTailnetFallback ? (
-              <Field>
-                <FieldLabel htmlFor="tailscale-dns-name-fallback">
-                  Tailnet DNS name fallback
-                </FieldLabel>
-                <Input
-                  id="tailscale-dns-name-fallback"
-                  value={tailnetDnsNameFallback}
-                  onChange={(event) =>
-                    setTailnetDnsNameFallback(event.target.value)
-                  }
-                  autoComplete="off"
-                  placeholder="tail1234.ts.net"
-                />
-                <FieldDescription>
-                  Automatic discovery failed. Enter the MagicDNS suffix without
-                  a protocol, path, or port, or retry discovery later.
-                </FieldDescription>
-              </Field>
+              <form.Field name="tailnetDnsNameFallback">
+                {(field) => (
+                  <FormField
+                    field={field}
+                    label="Tailnet DNS name fallback"
+                    description="Automatic discovery failed. Enter the MagicDNS suffix without a protocol, path, or port, or retry discovery later."
+                    inputProps={{
+                      id: 'tailscale-dns-name-fallback',
+                      autoComplete: 'off',
+                      placeholder: 'tail1234.ts.net',
+                      className: 'h-9',
+                    }}
+                  />
+                )}
+              </form.Field>
             ) : null}
           </FieldGroup>
         </FieldSet>
@@ -273,6 +303,7 @@ export default function TailscaleSettingsPanel({
           <AlertDescription>{notice.text}</AlertDescription>
         </Alert>
       ) : null}
+      {confirmDialogElement}
     </section>
   )
 }

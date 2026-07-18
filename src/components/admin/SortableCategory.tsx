@@ -4,6 +4,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useForm } from '@tanstack/react-form'
 import { useEffect, useState } from 'react'
 import { cn } from '#/lib/cn'
 import type {
@@ -12,14 +13,15 @@ import type {
   CategoryVisibility,
   DecoratedApp,
 } from '#/lib/types'
+import { CompactFormField } from '#/components/FormField'
 import { ToggleGroup, ToggleGroupItem } from '#/components/ui/toggle-group'
+import { appFormSchema } from '#/lib/form-schemas'
 import FeatherIcon from '../FeatherIcon'
 import SortableAppRow from './SortableAppRow'
 
-const emptyApp: AppFormValues = { name: '', url: '', icon: 'box' }
+const emptyApp: AppFormValues = { name: '', url: '', icon: '' }
 
-const inputClass =
-  'min-w-0 rounded-md border border-border bg-card px-2 py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary'
+const inputBaseClass = 'h-8 px-2.5 py-1 text-sm'
 const iconBtnClass =
   'inline-flex shrink-0 items-center justify-center rounded-md border border-border bg-card p-1.5 text-muted-foreground transition hover:border-primary hover:text-foreground'
 
@@ -48,10 +50,31 @@ export default function SortableCategory({
   const [name, setName] = useState(category.name)
   const [visibility, setVisibility] = useState(category.visibility)
   const [adding, setAdding] = useState(false)
-  const [appForm, setAppForm] = useState<AppFormValues>(emptyApp)
 
   useEffect(() => setName(category.name), [category.name])
   useEffect(() => setVisibility(category.visibility), [category.visibility])
+
+  const form = useForm({
+    defaultValues: emptyApp,
+    validators: {
+      onChange: appFormSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const ok = await onAddApp(category.id, {
+        name: value.name.trim(),
+        url: value.url.trim(),
+        icon: value.icon.trim(),
+      })
+      if (ok) {
+        form.reset()
+        setAdding(false)
+      }
+    },
+  })
+
+  useEffect(() => {
+    if (!adding) form.reset()
+  }, [adding, form])
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -72,19 +95,6 @@ export default function SortableCategory({
     setVisibility(next)
     const ok = await onVisibility(category, next)
     if (!ok) setVisibility(previous)
-  }
-
-  async function addApp() {
-    if (!appForm.name.trim() || !appForm.url.trim() || !appForm.icon.trim()) return
-    const ok = await onAddApp(category.id, {
-      name: appForm.name.trim(),
-      url: appForm.url.trim(),
-      icon: appForm.icon.trim(),
-    })
-    if (ok) {
-      setAppForm(emptyApp)
-      setAdding(false)
-    }
   }
 
   return (
@@ -161,36 +171,63 @@ export default function SortableCategory({
         </SortableContext>
 
         {adding ? (
-          <div className="mt-2 flex items-center gap-2">
-            <input
-              value={appForm.name}
-              onChange={(e) =>
-                setAppForm((f) => ({ ...f, name: e.target.value }))
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              void form.handleSubmit()
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                form.reset()
+                setAdding(false)
               }
-              placeholder="Name"
-              className={cn(inputClass, 'flex-1')}
-              aria-label="New app name"
-              autoFocus
-            />
-            <input
-              value={appForm.url}
-              onChange={(e) => setAppForm((f) => ({ ...f, url: e.target.value }))}
-              placeholder="URL"
-              className={cn(inputClass, 'flex-[2]')}
-              aria-label="New app URL"
-            />
-            <input
-              value={appForm.icon}
-              onChange={(e) =>
-                setAppForm((f) => ({ ...f, icon: e.target.value }))
-              }
-              placeholder="icon"
-              className={cn(inputClass, 'w-20')}
-              aria-label="New app icon"
-            />
+            }}
+            className="mt-2 flex items-start gap-2"
+          >
+            <form.Field name="icon">
+              {(field) => (
+                <CompactFormField
+                  field={field}
+                  label="New app icon"
+                  className="w-20 shrink-0"
+                  inputProps={{
+                    placeholder: 'Icon',
+                    className: inputBaseClass,
+                  }}
+                />
+              )}
+            </form.Field>
+            <form.Field name="name">
+              {(field) => (
+                <CompactFormField
+                  field={field}
+                  label="New app name"
+                  className="min-w-0 flex-1"
+                  inputProps={{
+                    placeholder: 'Name',
+                    autoFocus: true,
+                    className: inputBaseClass,
+                  }}
+                />
+              )}
+            </form.Field>
+            <form.Field name="url">
+              {(field) => (
+                <CompactFormField
+                  field={field}
+                  label="New app URL"
+                  className="min-w-0 flex-[2]"
+                  inputProps={{
+                    placeholder: 'URL',
+                    className: inputBaseClass,
+                  }}
+                />
+              )}
+            </form.Field>
             <button
-              type="button"
-              onClick={addApp}
+              type="submit"
               className={iconBtnClass}
               aria-label="Add app"
             >
@@ -199,7 +236,7 @@ export default function SortableCategory({
             <button
               type="button"
               onClick={() => {
-                setAppForm(emptyApp)
+                form.reset()
                 setAdding(false)
               }}
               className={iconBtnClass}
@@ -207,7 +244,7 @@ export default function SortableCategory({
             >
               <FeatherIcon name="X" size={16} />
             </button>
-          </div>
+          </form>
         ) : (
           <button
             type="button"
