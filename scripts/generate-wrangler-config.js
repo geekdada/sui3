@@ -6,9 +6,10 @@
  *   SUI3_DOMAIN_<ENV>
  *   SUI3_D1_DATABASE_ID_<ENV>
  *
- * Writes: wrangler.<env>.jsonc
+ * Merges overrides into the base wrangler.jsonc and writes wrangler.<env>.jsonc.
  */
-import { writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
+import { parse } from 'jsonc-parser'
 
 const env = process.argv[2] ?? 'production'
 const envSuffix = env.toUpperCase()
@@ -23,7 +24,10 @@ if (!d1Id) {
 }
 
 const baseName = env === 'production' ? 'sui3' : `sui3-${env}`
+const baseConfig = parse(readFileSync('wrangler.jsonc', 'utf8'))
+
 const config = {
+  ...baseConfig,
   name: baseName,
   routes: [
     {
