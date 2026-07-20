@@ -43,7 +43,11 @@ function SetupPage() {
             await finishSetupFn({
               data: { setupToken, challengeId, response },
             })
-            await queryClient.invalidateQueries()
+            // The "/" loader uses ensureQueryData, which reuses cached data —
+            // auth must be refetched before navigating or it loads the
+            // public startpage for the newly enrolled user.
+            await queryClient.fetchQuery(authStatusQueryOptions())
+            await queryClient.invalidateQueries({ queryKey: ['startpage'] })
             router.navigate({ to: '/' })
           } catch (err) {
             setError(err instanceof Error ? err.message : 'Setup failed')
