@@ -2,32 +2,34 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { importDataFn } from '#/lib/apps.functions'
+import { invalidateAppData } from '#/lib/queries'
 
 export default function ImportPanel() {
   const queryClient = useQueryClient()
   const importData = useServerFn(importDataFn)
   const [text, setText] = useState('')
+  const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(
     null,
   )
 
   async function submit() {
+    setBusy(true)
     setStatus(null)
     try {
       const result = await importData({ data: { json: text } })
+      await invalidateAppData(queryClient)
       setStatus({
         ok: true,
         text: `Imported ${result.categories} categories, ${result.apps} apps`,
       })
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['admin'] }),
-        queryClient.invalidateQueries({ queryKey: ['startpage'] }),
-      ])
     } catch (err) {
       setStatus({
         ok: false,
         text: err instanceof Error ? err.message : 'Import failed',
       })
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -68,10 +70,10 @@ export default function ImportPanel() {
         <button
           type="button"
           onClick={submit}
-          disabled={text.trim().length < 2}
+          disabled={busy || text.trim().length < 2}
           className="rounded-md border border-border bg-card px-2.5 py-1.5 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Import
+          {busy ? 'Importing…' : 'Import'}
         </button>
         {status ? (
           <span

@@ -25,6 +25,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { cn } from '#/lib/cn'
+import { invalidateAppData } from '#/lib/queries'
 import {
   createAppFn,
   createCategoryFn,
@@ -55,12 +56,8 @@ export default function AdminEditor({
 }) {
   const queryClient = useQueryClient()
   const refreshData = useCallback(
-    () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['admin'] }),
-        queryClient.invalidateQueries({ queryKey: ['startpage'] }),
-      ]),
-    [queryClient],
+    () => invalidateAppData(queryClient),
+    [queryClient]
   )
   const { confirm: confirmDialog, dialog: confirmDialogElement } =
     useConfirmDialog()
@@ -76,16 +73,14 @@ export default function AdminEditor({
   const catsRef = useRef(cats)
   const setCats = useCallback(
     (
-      updater:
-        | AdminCategory[]
-        | ((prev: AdminCategory[]) => AdminCategory[]),
+      updater: AdminCategory[] | ((prev: AdminCategory[]) => AdminCategory[])
     ) => {
       const next =
         typeof updater === 'function' ? updater(catsRef.current) : updater
       catsRef.current = next
       setCatsState(next)
     },
-    [],
+    []
   )
 
   const [error, setError] = useState<string | null>(null)
@@ -96,15 +91,20 @@ export default function AdminEditor({
   const lastOverId = useRef<UniqueIdentifier | null>(null)
   const recentlyMovedToNewContainer = useRef(false)
 
-  // Server data is the source of truth; reset local state whenever it changes.
-  useEffect(() => setCats(categories), [categories, setCats])
+  // Server data is the source of truth; reset local state whenever it changes —
+  // but never mid-drag, or a background refetch would break the interaction.
+  // The next mutation's invalidation re-syncs any update skipped here.
+  useEffect(() => {
+    if (activeIdRef.current != null) return
+    setCats(categories)
+  }, [categories, setCats])
   useEffect(() => {
     recentlyMovedToNewContainer.current = false
   }, [cats])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
   const findContainer = useCallback((id: UniqueIdentifier): string | null => {
@@ -119,7 +119,7 @@ export default function AdminEditor({
       return closestCenter({
         ...args,
         droppableContainers: args.droppableContainers.filter(
-          (c) => c.data.current?.type === 'category',
+          (c) => c.data.current?.type === 'category'
         ),
       })
     }
@@ -134,7 +134,7 @@ export default function AdminEditor({
         const closest = closestCenter({
           ...args,
           droppableContainers: args.droppableContainers.filter(
-            (c) => c.id !== overId && appIds.has(c.id as string),
+            (c) => c.id !== overId && appIds.has(c.id as string)
           ),
         })[0]?.id
         if (closest != null) overId = closest
@@ -240,7 +240,7 @@ export default function AdminEditor({
       from === to
         ? current
         : current.map((cat, i) =>
-            i === c ? { ...cat, apps: arrayMove(cat.apps, from, to) } : cat,
+            i === c ? { ...cat, apps: arrayMove(cat.apps, from, to) } : cat
           )
     setCats(next)
     void persist(next)
@@ -267,7 +267,7 @@ export default function AdminEditor({
             id: a.id,
             category_id: c.id,
             sort_order: i,
-          })),
+          }))
         ),
       }
       setError(null)
@@ -279,7 +279,7 @@ export default function AdminEditor({
         setCats(categories)
       }
     },
-    [reorder, refreshData, categories, setCats],
+    [reorder, refreshData, categories, setCats]
   )
 
   const run = useCallback(
@@ -294,7 +294,7 @@ export default function AdminEditor({
         return false
       }
     },
-    [refreshData],
+    [refreshData]
   )
 
   const renameCategory = (cat: AdminCategory, name: string) =>
@@ -306,12 +306,12 @@ export default function AdminEditor({
           visibility: cat.visibility,
           sort_order: cat.sort_order,
         },
-      }),
+      })
     )
 
   const setCategoryVisibility = (
     cat: AdminCategory,
-    visibility: CategoryVisibility,
+    visibility: CategoryVisibility
   ) =>
     run(() =>
       updateCategory({
@@ -321,7 +321,7 @@ export default function AdminEditor({
           visibility,
           sort_order: cat.sort_order,
         },
-      }),
+      })
     )
 
   const deleteCategory = async (cat: AdminCategory) => {
@@ -347,7 +347,7 @@ export default function AdminEditor({
           sort_order: app.sort_order,
           ...values,
         },
-      }),
+      })
     )
 
   const deleteApp = async (app: DecoratedApp) => {
@@ -368,7 +368,9 @@ export default function AdminEditor({
   async function addCategory() {
     if (!newCatName.trim()) return
     const ok = await run(() =>
-      createCategory({ data: { name: newCatName.trim(), visibility: newCatVis } }),
+      createCategory({
+        data: { name: newCatName.trim(), visibility: newCatVis },
+      })
     )
     if (ok) {
       setNewCatName('')
@@ -422,12 +424,15 @@ export default function AdminEditor({
 
         <DragOverlay>
           {activeCategory ? (
-            <div className="rounded-lg border border-primary bg-card px-3 py-2 text-sm font-semibold tracking-wide text-foreground uppercase shadow-lg">
+            <div className="rounded-lg border border-primary bg-card px-3 py-2 text-sm font-semibold  text-foreground uppercase shadow-lg">
               {activeCategory.name}
             </div>
           ) : activeApp ? (
             <div className="flex items-center gap-2 rounded-md border border-primary bg-card px-2 py-1.5 shadow-lg">
-              <AppIcon icon={activeApp.icon} className="text-muted-foreground" />
+              <AppIcon
+                icon={activeApp.icon}
+                className="text-muted-foreground"
+              />
               <span className="text-sm font-medium">{activeApp.name}</span>
             </div>
           ) : null}
@@ -457,7 +462,9 @@ export default function AdminEditor({
             />
             <select
               value={newCatVis}
-              onChange={(e) => setNewCatVis(e.target.value as CategoryVisibility)}
+              onChange={(e) =>
+                setNewCatVis(e.target.value as CategoryVisibility)
+              }
               className={inputClass}
               aria-label="New category visibility"
             >
