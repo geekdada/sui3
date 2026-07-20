@@ -21,7 +21,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { useRouter } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { cn } from '#/lib/cn'
@@ -53,7 +53,15 @@ export default function AdminEditor({
 }: {
   categories: AdminCategory[]
 }) {
-  const router = useRouter()
+  const queryClient = useQueryClient()
+  const refreshData = useCallback(
+    () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin'] }),
+        queryClient.invalidateQueries({ queryKey: ['startpage'] }),
+      ]),
+    [queryClient],
+  )
   const { confirm: confirmDialog, dialog: confirmDialogElement } =
     useConfirmDialog()
   const reorder = useServerFn(reorderLayoutFn)
@@ -265,13 +273,13 @@ export default function AdminEditor({
       setError(null)
       try {
         await reorder({ data: payload })
-        await router.invalidate()
+        await refreshData()
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Reorder failed')
         setCats(categories)
       }
     },
-    [reorder, router, categories, setCats],
+    [reorder, refreshData, categories, setCats],
   )
 
   const run = useCallback(
@@ -279,14 +287,14 @@ export default function AdminEditor({
       setError(null)
       try {
         await fn()
-        await router.invalidate()
+        await refreshData()
         return true
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Something went wrong')
         return false
       }
     },
-    [router],
+    [refreshData],
   )
 
   const renameCategory = (cat: AdminCategory, name: string) =>

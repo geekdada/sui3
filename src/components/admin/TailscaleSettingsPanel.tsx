@@ -1,5 +1,5 @@
 import { useForm } from '@tanstack/react-form'
-import { useRouter } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { useEffect, useState } from 'react'
 import { useConfirmDialog } from '#/components/ConfirmDialog'
@@ -32,7 +32,7 @@ export default function TailscaleSettingsPanel({
 }: {
   settings: TailscaleSettingsSummary
 }) {
-  const router = useRouter()
+  const queryClient = useQueryClient()
   const saveSettings = useServerFn(saveTailscaleSettingsFn)
   const refreshServices = useServerFn(refreshTailscaleServicesFn)
   const deleteSettings = useServerFn(deleteTailscaleSettingsFn)
@@ -99,7 +99,10 @@ export default function TailscaleSettingsPanel({
         form.reset()
         setShowTailnetFallback(false)
       }
-      await router.invalidate()
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin'] }),
+        queryClient.invalidateQueries({ queryKey: ['startpage'] }),
+      ])
       setNotice({ kind: 'success', text: success })
     } catch (error) {
       const message =

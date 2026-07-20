@@ -1,10 +1,10 @@
-import { useRouter } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { importDataFn } from '#/lib/apps.functions'
 
 export default function ImportPanel() {
-  const router = useRouter()
+  const queryClient = useQueryClient()
   const importData = useServerFn(importDataFn)
   const [text, setText] = useState('')
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(
@@ -19,7 +19,10 @@ export default function ImportPanel() {
         ok: true,
         text: `Imported ${result.categories} categories, ${result.apps} apps`,
       })
-      await router.invalidate()
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin'] }),
+        queryClient.invalidateQueries({ queryKey: ['startpage'] }),
+      ])
     } catch (err) {
       setStatus({
         ok: false,

@@ -1,29 +1,27 @@
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import Clock from '#/components/Clock'
 import Sidebar from '#/components/Sidebar'
 import Startpage from '#/components/Startpage'
-import { getStartpageData } from '#/lib/apps.functions'
-import { fetchPublicStartpageData } from '#/lib/public-startpage'
+import { authStatusQueryOptions, startpageQueryOptions } from '#/lib/queries'
 
 export const Route = createFileRoute('/')({
-  loader: async ({ abortController, parentMatchPromise }) => {
-    const parentMatch = await parentMatchPromise
-    if (!parentMatch.loaderData) {
-      throw new Error('Root authentication state is unavailable')
-    }
-    const authenticated = parentMatch.loaderData.authenticated
-
-    if (authenticated || typeof window === 'undefined') {
-      return getStartpageData()
-    }
-
-    return fetchPublicStartpageData(abortController.signal)
+  loader: async ({ context }) => {
+    const { authenticated } = await context.queryClient.ensureQueryData(
+      authStatusQueryOptions(),
+    )
+    await context.queryClient.ensureQueryData(
+      startpageQueryOptions(authenticated),
+    )
   },
   component: HomePage,
 })
 
 function HomePage() {
-  const { categories, authenticated } = Route.useLoaderData()
+  const { data: auth } = useQuery(authStatusQueryOptions())
+  const authenticated = auth?.authenticated ?? false
+  const { data } = useQuery(startpageQueryOptions(authenticated))
+  const categories = data?.categories ?? []
   return (
     <div className="flex">
       <Sidebar categories={categories} authenticated={authenticated} />

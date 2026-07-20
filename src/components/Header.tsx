@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { logoutFn } from '#/lib/auth.functions'
@@ -14,6 +15,7 @@ export default function Header({
   enrolled: boolean
 }) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const logout = useServerFn(logoutFn)
 
   return (
@@ -33,7 +35,7 @@ export default function Header({
               size="sm"
               onClick={async () => {
                 await logout()
-                await router.invalidate()
+                queryClient.clear()
                 router.navigate({ to: '/' })
               }}
             >

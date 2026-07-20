@@ -1,19 +1,23 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { startRegistration } from '@simplewebauthn/browser'
 import { useState } from 'react'
-import { beginSetupFn, finishSetupFn, getAuthStatus } from '#/lib/auth.functions'
+import { beginSetupFn, finishSetupFn } from '#/lib/auth.functions'
+import { authStatusQueryOptions } from '#/lib/queries'
 
 export const Route = createFileRoute('/setup')({
-  loader: async () => {
-    const status = await getAuthStatus()
+  loader: async ({ context }) => {
+    const status = await context.queryClient.fetchQuery(
+      authStatusQueryOptions(),
+    )
     if (status.enrolled) throw redirect({ to: status.authenticated ? '/' : '/login' })
-    return status
   },
   component: SetupPage,
 })
 
 function SetupPage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [setupToken, setSetupToken] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -39,7 +43,7 @@ function SetupPage() {
             await finishSetupFn({
               data: { setupToken, challengeId, response },
             })
-            await router.invalidate()
+            await queryClient.invalidateQueries()
             router.navigate({ to: '/' })
           } catch (err) {
             setError(err instanceof Error ? err.message : 'Setup failed')

@@ -1,24 +1,24 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { useState } from 'react'
-import {
-  beginLoginFn,
-  finishLoginFn,
-  getAuthStatus,
-} from '#/lib/auth.functions'
+import { beginLoginFn, finishLoginFn } from '#/lib/auth.functions'
+import { authStatusQueryOptions } from '#/lib/queries'
 
 export const Route = createFileRoute('/login')({
-  loader: async () => {
-    const status = await getAuthStatus()
+  loader: async ({ context }) => {
+    const status = await context.queryClient.fetchQuery(
+      authStatusQueryOptions(),
+    )
     if (!status.enrolled) throw redirect({ to: '/setup' })
     if (status.authenticated) throw redirect({ to: '/' })
-    return status
   },
   component: LoginPage,
 })
 
 function LoginPage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -42,7 +42,7 @@ function LoginPage() {
             const { options, challengeId } = await beginLoginFn()
             const response = await startAuthentication({ optionsJSON: options })
             await finishLoginFn({ data: { challengeId, response } })
-            await router.invalidate()
+            await queryClient.invalidateQueries()
             router.navigate({ to: '/' })
           } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed')

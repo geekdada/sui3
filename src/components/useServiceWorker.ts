@@ -1,11 +1,10 @@
 import {
-  startTransition,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from 'react'
-import { useRouter } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import { isCacheActivityMessage } from '#/lib/service-worker-messages'
 
 export type WorkerStatus =
@@ -17,7 +16,7 @@ export type WorkerStatus =
   | 'error'
 
 export function useServiceWorker(authenticated: boolean) {
-  const router = useRouter()
+  const queryClient = useQueryClient()
   const [online, setOnline] = useState(true)
   const [status, setStatus] = useState<WorkerStatus>('registering')
   const [error, setError] = useState<string | null>(null)
@@ -27,10 +26,8 @@ export function useServiceWorker(authenticated: boolean) {
   const refreshedEventIdsRef = useRef(new Set<string>())
 
   const refreshData = useCallback(() => {
-    startTransition(() => {
-      void router.invalidate()
-    })
-  }, [router])
+    void queryClient.invalidateQueries({ queryKey: ['startpage'] })
+  }, [queryClient])
 
   useEffect(() => {
     authenticatedRef.current = authenticated
