@@ -2,6 +2,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { logoutFn } from '#/lib/auth.functions'
+import { cn } from '#/lib/cn'
+import { authStatusQueryOptions } from '#/lib/queries'
 import FeatherIcon from './FeatherIcon'
 import ServiceWorkerUpdate from './ServiceWorkerUpdate'
 import ThemeToggle from './ThemeToggle'
@@ -19,8 +21,8 @@ export default function Header({
   const logout = useServerFn(logoutFn)
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-header-bg backdrop-blur">
-      <nav className="flex h-14 items-center gap-3 px-4 sm:px-6">
+    <header className="sticky top-0 z-50 bg-header-bg backdrop-blur">
+      <nav className="flex h-14 items-center gap-3 border-b border-border px-4 sm:px-6">
         <Link
           to="/"
           className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1 text-sm font-semibold tracking-tight text-foreground no-underline"
@@ -35,7 +37,15 @@ export default function Header({
               size="sm"
               onClick={async () => {
                 await logout()
-                queryClient.clear()
+                // Seed the known post-logout auth state instead of clearing it,
+                // so the header doesn't flash the "Setup" link while refetching.
+                queryClient.setQueryData(authStatusQueryOptions().queryKey, {
+                  authenticated: false,
+                  enrolled: true,
+                })
+                queryClient.removeQueries({
+                  predicate: (query) => query.queryKey[0] !== 'auth',
+                })
                 router.navigate({ to: '/' })
               }}
             >
@@ -45,7 +55,9 @@ export default function Header({
           ) : enrolled ? (
             <Link
               to="/login"
-              className={buttonVariants({ variant: 'outline', size: 'sm' })}
+              className={cn(
+                buttonVariants({ variant: 'outline', size: 'sm' }),
+              )}
             >
               <FeatherIcon name="LogIn" size={15} />
               <span className="hidden sm:inline">Log in</span>
@@ -53,7 +65,9 @@ export default function Header({
           ) : (
             <Link
               to="/setup"
-              className={buttonVariants({ variant: 'outline', size: 'sm' })}
+              className={cn(
+                buttonVariants({ variant: 'outline', size: 'sm' }),
+              )}
             >
               <FeatherIcon name="Key" size={15} />
               <span className="hidden sm:inline">Setup</span>
