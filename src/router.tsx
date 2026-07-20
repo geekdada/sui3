@@ -1,6 +1,7 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient } from '@tanstack/react-query'
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
+import { isAuthError } from '#/lib/queries'
 import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
@@ -9,7 +10,7 @@ export function getRouter() {
       queries: {
         staleTime: 0,
         refetchOnWindowFocus: true,
-        retry: 1,
+        retry: (failureCount, error) => failureCount < 1 && !isAuthError(error),
       },
     },
   })
@@ -20,13 +21,9 @@ export function getRouter() {
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
     context: { queryClient },
-    Wrap: ({ children }) => (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    ),
   })
 
+  // Also wraps the router in a QueryClientProvider.
   setupRouterSsrQueryIntegration({ router, queryClient })
 
   return router
