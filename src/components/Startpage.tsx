@@ -25,6 +25,13 @@ type SearchItem = {
   name: string
 }
 
+function focusApp(id: string) {
+  const app = Array.from(
+    document.querySelectorAll<HTMLElement>('[data-app-id]'),
+  ).find((element) => element.dataset.appId === id)
+  app?.focus()
+}
+
 export default function Startpage({
   categories,
 }: {
@@ -68,6 +75,27 @@ export default function Startpage({
       ) {
         return
       }
+
+      if (
+        (e.key === 'ArrowLeft' || e.key === 'ArrowRight') &&
+        matchedIds.length > 0
+      ) {
+        e.preventDefault()
+        const activeId = (document.activeElement as HTMLElement | null)?.dataset
+          .appId
+        const activeIndex = activeId ? matchedIds.indexOf(activeId) : -1
+        const direction = e.key === 'ArrowRight' ? 1 : -1
+        const nextIndex =
+          activeIndex === -1
+            ? direction === 1
+              ? 0
+              : matchedIds.length - 1
+            : (activeIndex + direction + matchedIds.length) %
+              matchedIds.length
+        focusApp(matchedIds[nextIndex])
+        return
+      }
+
       const key = e.keyCode || e.which
       if (key === 9 || key === 13) return
 
@@ -87,7 +115,7 @@ export default function Startpage({
 
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [matchedIds])
 
   useEffect(() => {
     if (!keyword) {
@@ -97,7 +125,10 @@ export default function Startpage({
     }
 
     const results = fuse.search(keyword)
-    const ids = results.map((r) => r.item.id)
+    const resultIds = new Set(results.map((result) => result.item.id))
+    const ids = flat
+      .filter((item) => resultIds.has(item.id))
+      .map((item) => item.id)
     setMatchedIds(ids)
 
     const nextHighlights: Record<string, string> = {}
@@ -115,12 +146,9 @@ export default function Startpage({
     setHighlights(nextHighlights)
 
     if (ids[0] && document.activeElement !== inputRef.current) {
-      const el = document.querySelector<HTMLElement>(
-        `[data-app-id="${ids[0]}"]`
-      )
-      el?.focus()
+      focusApp(ids[0])
     }
-  }, [keyword, fuse])
+  }, [keyword, fuse, flat])
 
   return (
     <div>
@@ -172,7 +200,6 @@ export default function Startpage({
                       key={app.id}
                       app={app}
                       matched={matched}
-                      tabIndex={matched ? matchedIds.indexOf(app.id) + 1 : 0}
                       label={label}
                     />
                   )

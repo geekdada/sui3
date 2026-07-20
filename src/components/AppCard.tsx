@@ -5,12 +5,10 @@ import type { StartpageApp } from './Startpage'
 export default function AppCard({
   app,
   matched,
-  tabIndex,
   label,
 }: {
   app: StartpageApp
   matched: boolean
-  tabIndex: number
   /** App name, possibly containing <em> search-highlight markup. */
   label: string
 }) {
@@ -20,9 +18,8 @@ export default function AppCard({
       href={app.url}
       target="_blank"
       rel="noreferrer"
-      tabIndex={tabIndex}
       className={cn(
-        'app-card flex flex-col gap-2 rounded-lg border border-border bg-card p-3 text-foreground no-underline transition hover:border-primary hover:bg-secondary/60',
+        'app-card flex flex-col gap-2 rounded-lg border border-border bg-card p-3 text-foreground no-underline transition hover:border-primary hover:bg-secondary/60 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         matched && 'matched',
       )}
     >
