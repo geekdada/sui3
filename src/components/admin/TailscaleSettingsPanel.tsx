@@ -16,6 +16,7 @@ import {
   saveTailscaleSettingsFn,
 } from '#/lib/tailscale.functions'
 import { tailscaleSettingsSchema } from '#/lib/form-schemas'
+import { invalidateAppData } from '#/lib/queries'
 import { getTailnetDnsDiscoveryErrorMessage } from '#/lib/tailscale-errors'
 import type { TailscaleSettingsSummary } from '#/lib/tailscale-service'
 
@@ -99,10 +100,7 @@ export default function TailscaleSettingsPanel({
         form.reset()
         setShowTailnetFallback(false)
       }
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['admin'] }),
-        queryClient.invalidateQueries({ queryKey: ['startpage'] }),
-      ])
+      await invalidateAppData(queryClient)
       setNotice({ kind: 'success', text: success })
     } catch (error) {
       const message =

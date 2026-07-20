@@ -76,7 +76,7 @@ function CategoryNav({
         ) : null}
       </nav>
 
-      <p className="mt-6 mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <p className="mt-6 mb-2 px-1 text-[11px] font-semibold uppercase text-muted-foreground">
         Categories
       </p>
       <ul className="m-0 flex list-none flex-col gap-0.5 p-0">

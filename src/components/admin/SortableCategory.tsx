@@ -136,7 +136,7 @@ export default function SortableCategory({
             }
           }}
           aria-label="Category name"
-          className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm font-semibold tracking-wide text-foreground outline-none hover:border-border focus:border-primary"
+          className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm font-semibold  text-foreground outline-none hover:border-border focus:border-primary"
         />
         <ToggleGroup
           value={[visibility]}

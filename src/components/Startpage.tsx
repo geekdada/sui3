@@ -38,9 +38,9 @@ export default function Startpage({
   const flat = useMemo(
     () =>
       categories.flatMap((cat) =>
-        cat.apps.map((app) => ({ id: app.id, name: app.name })),
+        cat.apps.map((app) => ({ id: app.id, name: app.name }))
       ),
-    [categories],
+    [categories]
   )
 
   const fuse = useMemo(
@@ -52,7 +52,7 @@ export default function Startpage({
         minMatchCharLength: 1,
         threshold: 0.2,
       }),
-    [flat],
+    [flat]
   )
 
   // Type-anywhere search: build the keyword from key presses outside inputs.
@@ -77,7 +77,7 @@ export default function Startpage({
         else if (key === 27) next = ''
         else {
           const char = String.fromCharCode(
-            96 <= key && key <= 105 ? key - 48 : key,
+            96 <= key && key <= 105 ? key - 48 : key
           )
           if (/\w/.test(char)) next = prev + char
         }
@@ -105,7 +105,7 @@ export default function Startpage({
       const match = result.matches?.[0]
       if (!match) continue
       const indices = [...match.indices].sort(
-        (a, b) => b[1] - b[0] - (a[1] - a[0]),
+        (a, b) => b[1] - b[0] - (a[1] - a[0])
       )
       const [start, end] = indices[0]
       const text = match.value ?? result.item.name
@@ -116,7 +116,7 @@ export default function Startpage({
 
     if (ids[0] && document.activeElement !== inputRef.current) {
       const el = document.querySelector<HTMLElement>(
-        `[data-app-id="${ids[0]}"]`,
+        `[data-app-id="${ids[0]}"]`
       )
       el?.focus()
     }
@@ -151,7 +151,7 @@ export default function Startpage({
             className="mb-10 scroll-mt-20"
           >
             <div className="mb-3 flex items-baseline gap-2">
-              <h2 className="m-0 text-sm font-semibold tracking-wide text-muted-foreground">
+              <h2 className="m-0 text-sm font-semibold  text-muted-foreground">
                 {category.name}
               </h2>
               {category.visibility === 'auth' ? (
