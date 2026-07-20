@@ -151,13 +151,14 @@ export default function TailscaleSettingsPanel({
   return (
     <section className="mt-10">
       <Separator className="mb-6" />
-      <div className="mb-4 flex flex-wrap items-baseline gap-2">
-        <h2 className="m-0 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+      <div className="mb-4">
+        <h2 className="m-0 text-base font-semibold tracking-tight text-foreground">
           Tailscale
         </h2>
-        <span className="text-xs text-muted-foreground">
-          OAuth client · read-only Services sync
-        </span>
+        <p className="mt-1 text-sm text-muted-foreground">
+          List the services in your Tailnet in one place. The list is always
+          private. Only services that expose 80/443 port are displayed.
+        </p>
       </div>
 
       <form

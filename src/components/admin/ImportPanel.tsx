@@ -33,13 +33,14 @@ export default function ImportPanel() {
 
   return (
     <section className="mt-10 border-t border-border pt-6">
-      <div className="mb-3 flex items-baseline gap-2">
-        <h2 className="m-0 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+      <div className="mb-3">
+        <h2 className="m-0 text-base font-semibold tracking-tight text-foreground">
           Import
         </h2>
-        <span className="text-xs text-muted-foreground">
-          sui2 data.json · overwrites everything
-        </span>
+        <p className="mt-1 text-sm text-muted-foreground">
+          You can import your old SUI2 <code>data.json</code>. Only apps are
+          imported.
+        </p>
       </div>
 
       <textarea
