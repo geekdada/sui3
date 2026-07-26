@@ -12,7 +12,7 @@ import FeatherIcon from '../FeatherIcon'
 
 const inputBaseClass = 'h-8 px-2.5 py-1 text-sm'
 const iconBtnClass =
-  'inline-flex shrink-0 items-center justify-center rounded-md border border-border bg-card p-1.5 text-muted-foreground transition hover:border-primary hover:text-foreground'
+  'inline-flex shrink-0 items-center justify-center border-2 border-foreground bg-card p-1.5 text-foreground transition-shadow hover:shadow-brut-stroke-sm'
 
 export default function SortableAppRow({
   app,
@@ -76,7 +76,7 @@ export default function SortableAppRow({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1.5',
+        'flex items-center gap-2 border border-foreground bg-card px-2 py-1.5',
         isDragging && 'opacity-40'
       )}
     >
@@ -186,7 +186,10 @@ export default function SortableAppRow({
             variant="outline"
             size="sm"
             onClick={() => onDelete(app)}
-            className={cn(iconBtnClass, 'hover:border-match hover:text-match')}
+            className={cn(
+              iconBtnClass,
+              'border-1 hover:border-foreground hover:bg-foreground hover:text-background'
+            )}
             aria-label="Delete app"
           >
             <FeatherIcon name="Trash2" size={16} />

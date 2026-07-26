@@ -1,7 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
+import { Button, buttonVariants } from '#/components/ui/button'
 import { importDataFn } from '#/lib/apps.functions'
+import { cn } from '#/lib/cn'
 import { invalidateAppData } from '#/lib/queries'
 
 export default function ImportPanel() {
@@ -34,11 +36,9 @@ export default function ImportPanel() {
   }
 
   return (
-    <section className="mt-10 border-t border-border pt-6">
+    <section className="mt-10 border-t-2 border-border pt-6">
       <div className="mb-3">
-        <h2 className="m-0 text-base font-semibold tracking-tight text-foreground">
-          Import
-        </h2>
+        <h2 className="label-brut m-0 text-sm text-foreground">Import</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           You can import your old SUI2 <code>data.json</code>. Only apps are
           imported.
@@ -50,11 +50,16 @@ export default function ImportPanel() {
         onChange={(e) => setText(e.target.value)}
         rows={8}
         placeholder="Paste data.json"
-        className="w-full rounded-md border border-border bg-card px-3 py-2 font-mono text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
+        className="w-full border-2 border-foreground bg-card px-3 py-2 font-mono text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring"
       />
 
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <label className="cursor-pointer rounded-md border border-border bg-card px-2.5 py-1.5 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground">
+        <label
+          className={cn(
+            buttonVariants({ variant: 'outline' }),
+            'cursor-pointer',
+          )}
+        >
           Upload file
           <input
             type="file"
@@ -67,17 +72,19 @@ export default function ImportPanel() {
             }}
           />
         </label>
-        <button
+        <Button
           type="button"
           onClick={submit}
           disabled={busy || text.trim().length < 2}
-          className="rounded-md border border-border bg-card px-2.5 py-1.5 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
         >
           {busy ? 'Importing…' : 'Import'}
-        </button>
+        </Button>
         {status ? (
           <span
-            className={status.ok ? 'text-sm text-primary' : 'text-sm text-match'}
+            className={cn(
+              'border-l-[6px] px-3 py-1.5 text-sm font-medium text-foreground',
+              status.ok ? 'border-l-foreground bg-muted' : 'border-l-stroke bg-muted',
+            )}
           >
             {status.text}
           </span>

@@ -47,7 +47,7 @@ import FeatherIcon from '../FeatherIcon'
 import SortableCategory from './SortableCategory'
 
 const inputClass =
-  'rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary'
+  'border-2 border-foreground bg-card px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring'
 
 export default function AdminEditor({
   categories,
@@ -390,7 +390,11 @@ export default function AdminEditor({
 
   return (
     <div>
-      {error ? <p className="mb-3 text-sm text-match">{error}</p> : null}
+      {error ? (
+        <p className="mb-3 border-l-[6px] border-l-stroke bg-muted px-3 py-2 text-sm font-medium text-foreground">
+          {error}
+        </p>
+      ) : null}
       {confirmDialogElement}
 
       <DndContext
@@ -424,11 +428,11 @@ export default function AdminEditor({
 
         <DragOverlay>
           {activeCategory ? (
-            <div className="rounded-lg border border-primary bg-card px-3 py-2 text-sm font-semibold  text-foreground uppercase shadow-lg">
+            <div className="label-brut shadow-brut-stroke border-2 border-foreground bg-card px-3 py-2 text-sm text-foreground">
               {activeCategory.name}
             </div>
           ) : activeApp ? (
-            <div className="flex items-center gap-2 rounded-md border border-primary bg-card px-2 py-1.5 shadow-lg">
+            <div className="shadow-brut-stroke flex items-center gap-2 border-2 border-foreground bg-card px-2 py-1.5">
               <AppIcon
                 icon={activeApp.icon}
                 className="text-muted-foreground"
@@ -468,20 +472,20 @@ export default function AdminEditor({
               className={inputClass}
               aria-label="New category visibility"
             >
-              <option value="auth">private</option>
-              <option value="public">public</option>
+              <option value="auth">Private</option>
+              <option value="public">Public</option>
             </select>
             <button
               type="button"
               onClick={addCategory}
-              className="rounded-md border border-border bg-card px-2.5 py-2 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground"
+              className="label-brut border-2 border-foreground bg-card px-2.5 py-2 text-xs text-foreground transition-shadow hover:shadow-brut-stroke-sm"
             >
               Add
             </button>
             <button
               type="button"
               onClick={() => setAddingCat(false)}
-              className="rounded-md border border-border bg-card px-2.5 py-2 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground"
+              className="label-brut border-2 border-foreground bg-card px-2.5 py-2 text-xs text-foreground transition-shadow hover:shadow-brut-stroke-sm"
             >
               Cancel
             </button>
@@ -490,7 +494,7 @@ export default function AdminEditor({
           <button
             type="button"
             onClick={() => setAddingCat(true)}
-            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-2.5 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground"
+            className="label-brut flex w-full items-center justify-center gap-1.5 border-2 border-dashed border-foreground px-3 py-2.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             <FeatherIcon name="Plus" size={15} />
             Add category

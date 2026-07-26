@@ -150,7 +150,7 @@ export default function TailscaleSettingsPanel({
     <section className="mt-10">
       <Separator className="mb-6" />
       <div className="mb-4">
-        <h2 className="m-0 text-base font-semibold tracking-tight text-foreground">
+        <h2 className="label-brut m-0 text-sm text-foreground">
           Tailscale
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">

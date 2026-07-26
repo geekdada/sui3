@@ -24,7 +24,7 @@ const emptyApp: AppFormValues = { name: '', url: '', icon: '' }
 
 const inputBaseClass = 'h-8 px-2.5 py-1 text-sm'
 const iconBtnClass =
-  'inline-flex shrink-0 items-center justify-center rounded-md border border-border bg-card p-1.5 text-muted-foreground transition hover:border-primary hover:text-foreground'
+  'inline-flex shrink-0 items-center justify-center border-2 border-foreground bg-card p-1.5 text-foreground transition-shadow hover:shadow-brut-stroke-sm'
 
 export default function SortableCategory({
   category,
@@ -110,11 +110,11 @@ export default function SortableCategory({
       id={category.id}
       style={style}
       className={cn(
-        'scroll-mt-20 rounded-lg border border-border bg-card',
+        'scroll-mt-20 border border-border-outer bg-card',
         isDragging && 'opacity-40'
       )}
     >
-      <header className="flex items-center gap-2 border-b border-border px-2 py-2">
+      <header className="flex items-center gap-2 border-b border-border-outer bg-muted px-2 py-2">
         <button
           type="button"
           className="shrink-0 cursor-grab touch-none text-muted-foreground transition hover:text-foreground active:cursor-grabbing"
@@ -136,7 +136,7 @@ export default function SortableCategory({
             }
           }}
           aria-label="Category name"
-          className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm font-semibold  text-foreground outline-none hover:border-border focus:border-primary"
+          className="label-brut min-w-0 flex-1 border-2 border-transparent bg-transparent px-1 py-0.5 text-foreground outline-none hover:border-foreground focus-visible:border-foreground focus-visible:ring-3 focus-visible:ring-ring"
         />
         <ToggleGroup
           value={[visibility]}
@@ -147,15 +147,18 @@ export default function SortableCategory({
           aria-label="Visibility"
           className="shrink-0"
         >
-          <ToggleGroupItem value="public">public</ToggleGroupItem>
-          <ToggleGroupItem value="auth">private</ToggleGroupItem>
+          <ToggleGroupItem value="public">Public</ToggleGroupItem>
+          <ToggleGroupItem value="auth">Private</ToggleGroupItem>
         </ToggleGroup>
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={() => onDelete(category)}
-          className={cn(iconBtnClass, 'hover:border-match hover:text-match')}
+          className={cn(
+            iconBtnClass,
+            'hover:bg-foreground hover:text-background'
+          )}
           aria-label="Delete category"
         >
           <FeatherIcon name="Trash2" size={16} />
@@ -254,7 +257,7 @@ export default function SortableCategory({
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="mt-2 flex w-full items-center gap-1.5 rounded-md border border-dashed border-border px-2 py-1.5 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground"
+            className="label-brut mt-2 flex w-full items-center gap-1.5 border-2 border-dashed border-foreground px-2 py-1.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             <FeatherIcon name="Plus" size={15} />
             Add app
