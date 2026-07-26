@@ -24,8 +24,11 @@ function SetupPage() {
 
   return (
     <main className="page max-w-md py-16">
-      <h1 className="m-0 text-2xl font-semibold tracking-tight">Setup</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
+      <h1 className="m-0 text-3xl font-bold tracking-[-0.03em]">
+        Setup
+      </h1>
+      <span aria-hidden className="mt-3 block h-[3px] w-24 bg-stroke" />
+      <p className="mt-3 text-sm text-muted-foreground">
         Enter the setup token from your deployment, then enroll the only
         passkey for this service.
       </p>
@@ -57,21 +60,27 @@ function SetupPage() {
         }}
       >
         <label className="block text-sm">
-          <span className="mb-1 block text-muted-foreground">Setup token</span>
+          <span className="label-brut mb-1.5 block text-xs text-foreground">
+            Setup token
+          </span>
           <input
             type="password"
             value={setupToken}
             onChange={(e) => setSetupToken(e.target.value)}
-            className="w-full rounded-md border border-border bg-card px-3 py-2"
+            className="w-full border-2 border-foreground bg-card px-3 py-2 font-mono outline-none focus-visible:ring-3 focus-visible:ring-ring"
             required
             autoComplete="off"
           />
         </label>
-        {error ? <p className="text-sm text-match">{error}</p> : null}
+        {error ? (
+          <p className="border-l-[6px] border-l-stroke bg-muted px-3 py-2 text-sm font-medium text-foreground">
+            {error}
+          </p>
+        ) : null}
         <button
           type="submit"
           disabled={busy}
-          className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-60"
+          className="border-2 border-foreground bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-shadow hover:shadow-brut-stroke active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-40"
         >
           {busy ? 'Enrolling…' : 'Enroll passkey'}
         </button>

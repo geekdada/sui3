@@ -45,7 +45,19 @@ function AdminPage() {
     <div className="flex">
       <Sidebar categories={categories} authenticated />
       <main className="min-w-0 flex-1 px-4 py-6 pb-24 sm:px-6 md:pb-6">
-        <h1 className="mb-6 text-xl font-semibold tracking-tight">Admin</h1>
+        <div className="relative mb-8 pb-4">
+          <h1 className="m-0 text-3xl font-bold tracking-[-0.03em] sm:text-4xl">
+            Admin
+          </h1>
+          <span
+            aria-hidden
+            className="absolute bottom-0 left-0 h-[3px] w-full bg-foreground"
+          />
+          <span
+            aria-hidden
+            className="absolute bottom-0 left-0 h-[3px] w-24 bg-stroke"
+          />
+        </div>
         {loadError && !sessionExpired ? (
           <Alert variant="destructive" className="mb-6">
             <FeatherIcon name="AlertCircle" />

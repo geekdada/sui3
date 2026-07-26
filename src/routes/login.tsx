@@ -24,17 +24,22 @@ function LoginPage() {
 
   return (
     <main className="page max-w-md py-16">
-      <h1 className="m-0 text-2xl font-semibold tracking-tight">Log in</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
+      <h1 className="m-0 text-3xl font-bold tracking-[-0.03em]">
+        Log in
+      </h1>
+      <span aria-hidden className="mt-3 block h-[3px] w-24 bg-stroke" />
+      <p className="mt-3 text-sm text-muted-foreground">
         Authenticate with your enrolled passkey.
       </p>
       {error ? (
-        <p className="mt-4 text-sm text-match">{error}</p>
+        <p className="mt-4 border-l-[6px] border-l-stroke bg-muted px-3 py-2 text-sm font-medium text-foreground">
+          {error}
+        </p>
       ) : null}
       <button
         type="button"
         disabled={busy}
-        className="mt-6 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-60"
+        className="mt-6 border-2 border-foreground bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-shadow hover:shadow-brut-stroke active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-40"
         onClick={async () => {
           setBusy(true)
           setError(null)
