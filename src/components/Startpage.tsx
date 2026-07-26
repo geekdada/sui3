@@ -151,7 +151,7 @@ export default function Startpage({
 
   return (
     <div>
-      <div className="mb-8 flex max-w-md items-stretch border-2 border-foreground bg-card focus-within:ring-3 focus-within:ring-ring">
+      <div className="mb-8 flex max-w-md items-stretch border-1 border-foreground bg-card focus-within:ring-3 focus-within:ring-ring">
         <span
           aria-hidden
           className="flex w-10 shrink-0 items-center justify-center bg-foreground text-background"
@@ -187,7 +187,7 @@ export default function Startpage({
               {category.visibility === 'auth' ? (
                 <Badge variant="secondary">Private</Badge>
               ) : null}
-              <span aria-hidden className="h-[2px] flex-1 bg-foreground" />
+              <span aria-hidden className="h-[1px] flex-1 bg-foreground" />
             </div>
             {category.apps.length === 0 && category.emptyMessage ? (
               <p className="text-sm text-muted-foreground">

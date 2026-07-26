@@ -14,11 +14,18 @@ import FeatherIcon from './FeatherIcon'
 const ALL = 'all'
 
 const navLinkClass =
-  'label-brut flex items-center gap-2 border-2 border-foreground px-2.5 py-1.5 text-xs no-underline transition-shadow hover:shadow-brut-stroke-sm'
+  'label-brut flex items-center gap-2 border-1 border-foreground px-2.5 py-1.5 text-xs no-underline transition-shadow hover:shadow-brut-stroke-sm'
 const navLinkActiveProps = {
   className: 'bg-foreground text-background',
 }
 const navLinkInactiveProps = { className: 'bg-background text-foreground' }
+
+// Left accent via ::before (not border-l) so ends stay square — CSS border miters
+// bevel when a thick left border meets the button's transparent sides.
+const categoryBtnClass =
+  'relative w-full justify-between overflow-hidden px-2 py-1.5 pl-3 text-xs text-muted-foreground hover:bg-muted hover:text-foreground before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-transparent'
+const categoryBtnActiveClass =
+  'bg-muted font-bold text-foreground before:bg-stroke'
 
 /** Minimal shape the sidebar reads — satisfied by both startpage and admin data. */
 type SidebarCategory = {
@@ -78,7 +85,7 @@ function CategoryNav({
 
       <div className="mt-6 mb-2 flex items-center gap-2 px-1">
         <p className="label-brut m-0 text-[11px] text-foreground">Categories</p>
-        <span aria-hidden className="h-[2px] flex-1 bg-foreground" />
+        <span aria-hidden className="h-[1px] flex-1 bg-foreground" />
       </div>
       <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
         <li>
@@ -88,8 +95,8 @@ function CategoryNav({
             size="sm"
             onClick={() => onJump(ALL)}
             className={cn(
-              'w-full justify-between border-l-4 border-l-transparent px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground',
-              active === ALL && 'border-l-stroke bg-muted font-bold text-foreground'
+              categoryBtnClass,
+              active === ALL && categoryBtnActiveClass
             )}
           >
             <span>All</span>
@@ -104,9 +111,9 @@ function CategoryNav({
               size="sm"
               onClick={() => onJump(category.id)}
               className={cn(
-                'w-full justify-between gap-2 border-l-4 border-l-transparent px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground',
-                active === category.id &&
-                  'border-l-stroke bg-muted font-bold text-foreground'
+                categoryBtnClass,
+                'gap-2',
+                active === category.id && categoryBtnActiveClass
               )}
             >
               <span className="flex min-w-0 items-center gap-1.5">
@@ -192,7 +199,7 @@ export default function Sidebar({
 
   return (
     <>
-      <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-[220px] shrink-0 overflow-y-auto border-r-2 border-border px-3 py-4 md:block">
+      <aside className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-[220px] shrink-0 overflow-y-auto border-r-1 border-border px-3 py-4 md:block">
         <CategoryNav
           categories={categories}
           authenticated={authenticated}
@@ -214,7 +221,7 @@ export default function Sidebar({
       >
         <DrawerTrigger
           aria-label="Open navigation"
-          className="shadow-brut-stroke fixed bottom-5 left-4 z-40 flex size-11 items-center justify-center border-2 border-foreground bg-background text-foreground transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none md:hidden"
+          className="shadow-brut-stroke fixed bottom-5 left-4 z-40 flex size-11 items-center justify-center border-1 border-foreground bg-background text-foreground transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none md:hidden"
         >
           <FeatherIcon name="Menu" size={18} />
         </DrawerTrigger>

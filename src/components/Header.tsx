@@ -22,10 +22,10 @@ export default function Header({
 
   return (
     <header className="sticky top-0 z-50 bg-header-bg backdrop-blur">
-      <nav className="flex h-14 items-center gap-3 border-b-2 border-border px-4 sm:px-6">
+      <nav className="flex h-14 items-center gap-3 border-b-1 border-border px-4 sm:px-6">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 border-2 border-foreground bg-foreground px-2.5 py-1 font-mono text-sm font-bold tracking-[0.14em] text-background no-underline transition-shadow hover:shadow-brut-stroke-sm"
+          className="inline-flex items-center gap-2 border-1 border-foreground bg-foreground px-2.5 py-1 font-mono text-sm font-bold tracking-[0.14em] text-background no-underline transition-shadow hover:shadow-brut-stroke-sm"
         >
           <FeatherIcon name="Grid" size={15} />
           SUI3
@@ -55,9 +55,7 @@ export default function Header({
           ) : enrolled ? (
             <Link
               to="/login"
-              className={cn(
-                buttonVariants({ variant: 'outline', size: 'sm' }),
-              )}
+              className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
             >
               <FeatherIcon name="LogIn" size={15} />
               <span className="hidden sm:inline">Log in</span>
@@ -65,9 +63,7 @@ export default function Header({
           ) : (
             <Link
               to="/setup"
-              className={cn(
-                buttonVariants({ variant: 'outline', size: 'sm' }),
-              )}
+              className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
             >
               <FeatherIcon name="Key" size={15} />
               <span className="hidden sm:inline">Setup</span>
