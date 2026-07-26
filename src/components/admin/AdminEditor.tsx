@@ -24,6 +24,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Alert, AlertDescription } from '#/components/ui/alert'
 import { cn } from '#/lib/cn'
 import { invalidateAppData } from '#/lib/queries'
 import {
@@ -47,7 +48,7 @@ import FeatherIcon from '../FeatherIcon'
 import SortableCategory from './SortableCategory'
 
 const inputClass =
-  'border-2 border-foreground bg-card px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring'
+  'border-1 border-foreground bg-card px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring'
 
 export default function AdminEditor({
   categories,
@@ -428,11 +429,11 @@ export default function AdminEditor({
 
         <DragOverlay>
           {activeCategory ? (
-            <div className="label-brut shadow-brut-stroke border-2 border-foreground bg-card px-3 py-2 text-sm text-foreground">
+            <div className="label-brut shadow-brut-stroke border-1 border-foreground bg-card px-3 py-2 text-sm text-foreground">
               {activeCategory.name}
             </div>
           ) : activeApp ? (
-            <div className="shadow-brut-stroke flex items-center gap-2 border-2 border-foreground bg-card px-2 py-1.5">
+            <div className="shadow-brut-stroke flex items-center gap-2 border-1 border-foreground bg-card px-2 py-1.5">
               <AppIcon
                 icon={activeApp.icon}
                 className="text-muted-foreground"
@@ -478,14 +479,14 @@ export default function AdminEditor({
             <button
               type="button"
               onClick={addCategory}
-              className="label-brut border-2 border-foreground bg-card px-2.5 py-2 text-xs text-foreground transition-shadow hover:shadow-brut-stroke-sm"
+              className="label-brut border-1 border-foreground bg-card px-2.5 py-2 text-xs text-foreground transition-shadow hover:shadow-brut-stroke-sm"
             >
               Add
             </button>
             <button
               type="button"
               onClick={() => setAddingCat(false)}
-              className="label-brut border-2 border-foreground bg-card px-2.5 py-2 text-xs text-foreground transition-shadow hover:shadow-brut-stroke-sm"
+              className="label-brut border-1 border-foreground bg-card px-2.5 py-2 text-xs text-foreground transition-shadow hover:shadow-brut-stroke-sm"
             >
               Cancel
             </button>
@@ -494,13 +495,27 @@ export default function AdminEditor({
           <button
             type="button"
             onClick={() => setAddingCat(true)}
-            className="label-brut flex w-full items-center justify-center gap-1.5 border-2 border-dashed border-foreground px-3 py-2.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className="label-brut flex w-full items-center justify-center gap-1.5 border-1 border-dashed border-foreground px-3 py-2.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             <FeatherIcon name="Plus" size={15} />
             Add category
           </button>
         )}
       </div>
+
+      <Alert className="mt-3 border-0">
+        <FeatherIcon name="Info" />
+        <AlertDescription>
+          <a
+            href="https://feathericons.com/"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            Feather icons
+          </a>{' '}
+          are available to use for the app icon.
+        </AlertDescription>
+      </Alert>
     </div>
   )
 }

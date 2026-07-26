@@ -12,7 +12,7 @@ import FeatherIcon from '../FeatherIcon'
 
 const inputBaseClass = 'h-8 px-2.5 py-1 text-sm'
 const iconBtnClass =
-  'inline-flex shrink-0 items-center justify-center border-2 border-foreground bg-card p-1.5 text-foreground transition-shadow hover:shadow-brut-stroke-sm'
+  'inline-flex shrink-0 items-center justify-center border-1 border-foreground bg-card p-1.5 text-foreground transition-shadow hover:shadow-brut-stroke-sm'
 
 export default function SortableAppRow({
   app,

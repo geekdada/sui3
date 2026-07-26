@@ -12,7 +12,7 @@ export default function ImportPanel() {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(
-    null,
+    null
   )
 
   async function submit() {
@@ -36,7 +36,7 @@ export default function ImportPanel() {
   }
 
   return (
-    <section className="mt-10 border-t-2 border-border pt-6">
+    <section className="mt-10 border-t-1 border-border pt-6">
       <div className="mb-3">
         <h2 className="label-brut m-0 text-sm text-foreground">Import</h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -50,14 +50,14 @@ export default function ImportPanel() {
         onChange={(e) => setText(e.target.value)}
         rows={8}
         placeholder="Paste data.json"
-        className="w-full border-2 border-foreground bg-card px-3 py-2 font-mono text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring"
+        className="w-full border-1 border-foreground bg-card px-3 py-2 font-mono text-xs text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring"
       />
 
       <div className="mt-2 flex flex-wrap items-center gap-2">
         <label
           className={cn(
             buttonVariants({ variant: 'outline' }),
-            'cursor-pointer',
+            'cursor-pointer'
           )}
         >
           Upload file
@@ -83,7 +83,9 @@ export default function ImportPanel() {
           <span
             className={cn(
               'border-l-[6px] px-3 py-1.5 text-sm font-medium text-foreground',
-              status.ok ? 'border-l-foreground bg-muted' : 'border-l-stroke bg-muted',
+              status.ok
+                ? 'border-l-foreground bg-muted'
+                : 'border-l-stroke bg-muted'
             )}
           >
             {status.text}

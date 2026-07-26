@@ -8,7 +8,6 @@ import FeatherIcon from '#/components/FeatherIcon'
 import { Alert, AlertDescription } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
 import { FieldGroup, FieldSet } from '#/components/ui/field'
-import { Separator } from '#/components/ui/separator'
 import { Spinner } from '#/components/ui/spinner'
 import {
   deleteTailscaleSettingsFn,
@@ -147,8 +146,7 @@ export default function TailscaleSettingsPanel({
       : (storedDiscoveryError ?? settings.lastSyncError)
 
   return (
-    <section className="mt-10">
-      <Separator className="mb-6" />
+    <section className="mt-10 border-t-1 border-border pt-6">
       <div className="mb-4">
         <h2 className="label-brut m-0 text-sm text-foreground">
           Tailscale
