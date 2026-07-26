@@ -8,9 +8,10 @@ import { authStatusQueryOptions } from '#/lib/queries'
 export const Route = createFileRoute('/setup')({
   loader: async ({ context }) => {
     const status = await context.queryClient.fetchQuery(
-      authStatusQueryOptions(),
+      authStatusQueryOptions()
     )
-    if (status.enrolled) throw redirect({ to: status.authenticated ? '/' : '/login' })
+    if (status.enrolled)
+      throw redirect({ to: status.authenticated ? '/' : '/login' })
   },
   component: SetupPage,
 })
@@ -24,13 +25,11 @@ function SetupPage() {
 
   return (
     <main className="page max-w-md py-16">
-      <h1 className="m-0 text-3xl font-bold tracking-[-0.03em]">
-        Setup
-      </h1>
+      <h1 className="m-0 text-3xl font-bold tracking-[-0.03em]">Setup</h1>
       <span aria-hidden className="mt-3 block h-[3px] w-24 bg-stroke" />
       <p className="mt-3 text-sm text-muted-foreground">
-        Enter the setup token from your deployment, then enroll the only
-        passkey for this service.
+        Enter the setup token from your deployment, then enroll the only passkey
+        for this service.
       </p>
       <form
         className="mt-6 space-y-4"
@@ -67,7 +66,7 @@ function SetupPage() {
             type="password"
             value={setupToken}
             onChange={(e) => setSetupToken(e.target.value)}
-            className="w-full border-2 border-foreground bg-card px-3 py-2 font-mono outline-none focus-visible:ring-3 focus-visible:ring-ring"
+            className="w-full border-1 border-foreground bg-card px-3 py-2 font-mono outline-none focus-visible:ring-3 focus-visible:ring-ring"
             required
             autoComplete="off"
           />
@@ -80,7 +79,7 @@ function SetupPage() {
         <button
           type="submit"
           disabled={busy}
-          className="border-2 border-foreground bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-shadow hover:shadow-brut-stroke active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-40"
+          className="border-1 border-foreground bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-shadow hover:shadow-brut-stroke active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-40"
         >
           {busy ? 'Enrolling…' : 'Enroll passkey'}
         </button>
