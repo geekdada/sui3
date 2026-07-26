@@ -71,6 +71,12 @@ Local: `.dev.vars` (gitignored). Production: Wrangler secrets/vars.
 3. Later visits: `/login` with passkey → issues access token cookie
 4. Cookie slides TTL on authenticated requests; logout revokes DB row
 
+Dev/test builds only (`import.meta.env.DEV`): `/login` also renders a "Skip passkey and log in"
+button backed by `devLoginFn` → `devLogin()` (`src/lib/dev-auth.ts`). It issues a normal session
+via `issueAccessToken()` without a WebAuthn ceremony and works before any passkey is enrolled, so
+`/login` does not redirect to `/setup` in dev. Vite replaces the guard with `false` in
+`pnpm build` / `build:production`, stripping the bypass from production bundles.
+
 ## Categories & import
 
 - Unauthenticated: only `visibility = public` categories
