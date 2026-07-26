@@ -1,14 +1,14 @@
 @import "tailwindcss";
-@import "@fontsource-variable/inter";
-@import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular,
+  --font-sans: "Geist Variable", Geist, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular,
     "SF Mono", Menlo, monospace;
 }
 
@@ -24,6 +24,8 @@
   /* App-only utilities that do not collide with shadcn token names */
   --color-match: var(--match);
   --color-header-bg: var(--header-bg);
+  /* The one non-monochrome value in the system. See --stroke below. */
+  --color-stroke: var(--stroke);
 
   /* shadcn semantic colors */
   --color-sidebar-ring: var(--sidebar-ring);
@@ -42,6 +44,8 @@
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
+  /* Outermost container edge — see --border-outer. */
+  --color-border-outer: var(--border-outer);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
@@ -58,6 +62,11 @@
   --color-foreground: var(--foreground);
   --color-background: var(--background);
 
+  /*
+   * Brutalism: nothing is rounded. Every `rounded-*` utility (including the
+   * ones baked into the shadcn primitives) derives from --radius, so pinning it
+   * to 0 squares off the whole UI from one place.
+   */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -69,84 +78,122 @@
 
 :root {
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(0.985 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(0.985 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --foreground: oklch(0 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0 0 0);
+  --primary: oklch(0 0 0);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.945 0 0);
+  --secondary-foreground: oklch(0 0 0);
+  --muted: oklch(0.955 0 0);
+  --muted-foreground: oklch(0.44 0 0);
+  --accent: oklch(0 0 0);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0 0 0);
+  --border: oklch(0 0 0);
+  --input: oklch(0 0 0);
+  --ring: var(--stroke);
+  --chart-1: oklch(0 0 0);
+  --chart-2: oklch(0.3 0 0);
+  --chart-3: oklch(0.5 0 0);
+  --chart-4: oklch(0.7 0 0);
+  --chart-5: oklch(0.85 0 0);
+  --radius: 0rem;
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0 0 0);
+  --sidebar-primary: oklch(0 0 0);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.955 0 0);
+  --sidebar-accent-foreground: oklch(0 0 0);
+  --sidebar-border: oklch(0 0 0);
+  --sidebar-ring: var(--stroke);
 
-  /* App-only tokens */
-  --match: #dc2626;
-  --header-bg: rgba(250, 250, 250, 0.85);
+  /*
+   * App-only tokens. The palette is strictly black/white/grey plus --stroke,
+   * which is reserved for accents: search hits, active nav, focus rings and
+   * hard drop shadows. It is a light value, so it is always paired with a
+   * black/white edge rather than used as standalone text or a hairline.
+   */
+  --stroke: lab(80.8059% 21.7313 50.4455);
+  --match: oklch(0 0 0);
+  --header-bg: oklch(1 0 0 / 0.92);
+
+  /*
+   * Outermost container edge only: dimmed 40% toward the background so the
+   * top-level frame recedes behind the inner content. Declared once — the
+   * var() references resolve per element, so `.dark` inverts it automatically.
+   */
+  --border-outer: color-mix(in oklch, var(--foreground) 60%, var(--background));
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.215 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.215 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(0 0 0);
+  --foreground: oklch(1 0 0);
+  --card: oklch(0 0 0);
+  --card-foreground: oklch(1 0 0);
+  --popover: oklch(0 0 0);
+  --popover-foreground: oklch(1 0 0);
+  --primary: oklch(1 0 0);
+  --primary-foreground: oklch(0 0 0);
+  --secondary: oklch(0.19 0 0);
+  --secondary-foreground: oklch(1 0 0);
+  --muted: oklch(0.17 0 0);
+  --muted-foreground: oklch(0.72 0 0);
+  --accent: oklch(1 0 0);
+  --accent-foreground: oklch(0 0 0);
+  --destructive: oklch(1 0 0);
+  --border: oklch(1 0 0);
+  --input: oklch(1 0 0);
+  --ring: var(--stroke);
+  --chart-1: oklch(1 0 0);
+  --chart-2: oklch(0.8 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.4 0 0);
+  --chart-5: oklch(0.25 0 0);
+  --sidebar: oklch(0 0 0);
+  --sidebar-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(1 0 0);
+  --sidebar-primary-foreground: oklch(0 0 0);
+  --sidebar-accent: oklch(0.17 0 0);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-border: oklch(1 0 0);
+  --sidebar-ring: var(--stroke);
 
   /* App-only tokens */
-  --match: #f87171;
-  --header-bg: rgba(10, 10, 10, 0.85);
+  --match: oklch(1 0 0);
+  --header-bg: oklch(0 0 0 / 0.92);
+}
+
+/*
+ * Hard offset shadows — no blur, no transparency. These are the primary depth
+ * cue now that corners and gradients are gone.
+ */
+@utility shadow-brut {
+  box-shadow: 4px 4px 0 0 var(--foreground);
+}
+
+@utility shadow-brut-sm {
+  box-shadow: 2px 2px 0 0 var(--foreground);
+}
+
+@utility shadow-brut-stroke {
+  box-shadow: 4px 4px 0 0 var(--stroke);
+}
+
+@utility shadow-brut-stroke-sm {
+  box-shadow: 2px 2px 0 0 var(--stroke);
+}
+
+/* Label treatment used for section titles and button text. */
+@utility label-brut {
+  font-weight: 600;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
   }
 
   html {
@@ -163,22 +210,48 @@
     @apply bg-background text-foreground;
   }
 
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.02em;
+  }
+
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
+
+  ::selection {
+    background: var(--stroke);
+    color: oklch(0 0 0);
+  }
+
+  /*
+   * Errors read as a hazard marker: an accent bar against high-contrast text,
+   * rather than tinted low-contrast type. Applies to every shadcn FieldError.
+   */
+  [data-slot="field-error"] {
+    border-left: 3px solid var(--stroke);
+    padding-left: 0.5rem;
+    color: var(--foreground);
+    font-weight: 500;
+  }
 }
 
+/* Search hit: black edge plus an offset accent block behind the card. */
 .app-card.matched,
 .matched {
-  outline: 2px solid var(--primary);
-  outline-offset: 0px;
-  border-color: transparent;
+  border-color: var(--foreground);
+  box-shadow: 4px 4px 0 0 var(--stroke);
+  transform: translate(-2px, -2px);
 }
 
+/* Matched substring, drawn like a marker pen stroke. */
 .app-card em,
 .matched em {
-  color: var(--match);
+  background: var(--stroke);
+  color: oklch(0 0 0);
+  box-shadow: 0 0 0 2px var(--stroke);
   font-style: normal;
   font-weight: 700;
 }
