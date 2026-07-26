@@ -1,15 +1,16 @@
-@import "tailwindcss";
-@import "@fontsource-variable/geist";
-@import "@fontsource-variable/geist-mono";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tailwindcss';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: "Geist Variable", Geist, ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular,
-    "SF Mono", Menlo, monospace;
+  --font-sans: 'Geist Variable', Geist, ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    'Geist Mono Variable', ui-monospace, SFMono-Regular, 'SF Mono', Menlo,
+    monospace;
 }
 
 /*
@@ -77,17 +78,28 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  --background: lab(97.7008% 1.53735 5.90649);
   --foreground: oklch(0 0 0);
-  --card: oklch(1 0 0);
+  --card: var(--background);
   --card-foreground: oklch(0 0 0);
-  --popover: oklch(1 0 0);
+  --popover: var(--background);
   --popover-foreground: oklch(0 0 0);
   --primary: oklch(0 0 0);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.945 0 0);
+  /*
+   * Translucent ink rather than a value off the neutral grey ramp: an opaque
+   * chroma-0 grey reads cool against the warm cream background, whereas a
+   * low-alpha --foreground lets the background's own hue through. Mixed in
+   * oklab, not oklch — a polar space resolves the hue of a `transparent`
+   * endpoint to `none`.
+   */
+  --secondary: color-mix(
+    in oklab,
+    lab(57.1026% 64.2584 89.8886) 13%,
+    transparent
+  );
   --secondary-foreground: oklch(0 0 0);
-  --muted: oklch(0.955 0 0);
+  --muted: color-mix(in oklab, lab(57.1026% 64.2584 89.8886) 5%, transparent);
   --muted-foreground: oklch(0.44 0 0);
   --accent: oklch(0 0 0);
   --accent-foreground: oklch(1 0 0);
@@ -101,11 +113,11 @@
   --chart-4: oklch(0.7 0 0);
   --chart-5: oklch(0.85 0 0);
   --radius: 0rem;
-  --sidebar: oklch(1 0 0);
+  --sidebar: var(--background);
   --sidebar-foreground: oklch(0 0 0);
   --sidebar-primary: oklch(0 0 0);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.955 0 0);
+  --sidebar-accent: var(--muted);
   --sidebar-accent-foreground: oklch(0 0 0);
   --sidebar-border: oklch(0 0 0);
   --sidebar-ring: var(--stroke);
@@ -118,7 +130,9 @@
    */
   --stroke: lab(80.8059% 21.7313 50.4455);
   --match: oklch(0 0 0);
-  --header-bg: oklch(1 0 0 / 0.92);
+  /* Mixed in srgb, not oklch: `transparent` has a powerless hue, so a polar
+   * space resolves the result's hue to `none` and the warm tint turns pink. */
+  --header-bg: color-mix(in srgb, var(--background) 92%, transparent);
 
   /*
    * Outermost container edge only: dimmed 40% toward the background so the
@@ -217,7 +231,7 @@
   }
 
   button:not(:disabled),
-  [role="button"]:not(:disabled) {
+  [role='button']:not(:disabled) {
     cursor: pointer;
   }
 
@@ -230,7 +244,7 @@
    * Errors read as a hazard marker: an accent bar against high-contrast text,
    * rather than tinted low-contrast type. Applies to every shadcn FieldError.
    */
-  [data-slot="field-error"] {
+  [data-slot='field-error'] {
     border-left: 3px solid var(--stroke);
     padding-left: 0.5rem;
     color: var(--foreground);
