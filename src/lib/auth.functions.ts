@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { requireAuthMiddleware } from '#/lib/auth-middleware'
+import { devLogin } from '#/lib/dev-auth'
 import {
   beginAuthentication,
   beginRegistration,
@@ -68,6 +69,14 @@ export const finishLoginFn = createServerFn({ method: 'POST' })
     })
     return { ok: true }
   })
+
+// Dev/test only — the handler throws in production builds. See #/lib/dev-auth.
+export const devLoginFn = createServerFn({ method: 'POST' }).handler(
+  async () => {
+    await devLogin()
+    return { ok: true }
+  },
+)
 
 export const logoutFn = createServerFn({ method: 'POST' }).handler(async () => {
   await revokeAccessToken(readAccessCookie())
