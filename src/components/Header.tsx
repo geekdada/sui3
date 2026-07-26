@@ -22,12 +22,12 @@ export default function Header({
 
   return (
     <header className="sticky top-0 z-50 bg-header-bg backdrop-blur">
-      <nav className="flex h-14 items-center gap-3 border-b border-border px-4 sm:px-6">
+      <nav className="flex h-14 items-center gap-3 border-b-2 border-border px-4 sm:px-6">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1 text-sm font-semibold tracking-tight text-foreground no-underline"
+          className="inline-flex items-center gap-2 border-2 border-foreground bg-foreground px-2.5 py-1 font-mono text-sm font-bold tracking-[0.14em] text-background no-underline transition-shadow hover:shadow-brut-stroke-sm"
         >
-          <FeatherIcon name="Grid" size={15} className="text-muted-foreground" />
+          <FeatherIcon name="Grid" size={15} />
           SUI3
         </Link>
         <div className="ml-auto flex items-center gap-2 text-sm">

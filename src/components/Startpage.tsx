@@ -27,7 +27,7 @@ type SearchItem = {
 
 function focusApp(id: string) {
   const app = Array.from(
-    document.querySelectorAll<HTMLElement>('[data-app-id]'),
+    document.querySelectorAll<HTMLElement>('[data-app-id]')
   ).find((element) => element.dataset.appId === id)
   app?.focus()
 }
@@ -90,8 +90,7 @@ export default function Startpage({
             ? direction === 1
               ? 0
               : matchedIds.length - 1
-            : (activeIndex + direction + matchedIds.length) %
-              matchedIds.length
+            : (activeIndex + direction + matchedIds.length) % matchedIds.length
         focusApp(matchedIds[nextIndex])
         return
       }
@@ -152,18 +151,21 @@ export default function Startpage({
 
   return (
     <div>
-      <div className="relative mb-6 max-w-md">
-        <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
-          <FeatherIcon name="Search" size={15} />
+      <div className="mb-8 flex max-w-md items-stretch border-2 border-foreground bg-card focus-within:ring-3 focus-within:ring-ring">
+        <span
+          aria-hidden
+          className="flex w-10 shrink-0 items-center justify-center bg-foreground text-background"
+        >
+          <FeatherIcon name="Search" size={16} />
         </span>
         <input
           ref={inputRef}
           type="text"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-          placeholder="Search apps… (or just start typing)"
+          placeholder="Search / just start typing"
           aria-label="Search apps"
-          className="w-full rounded-md border border-border bg-card py-2 pr-3 pl-9 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
+          className="w-full min-w-0 bg-transparent px-3 py-2.5 font-mono text-sm tracking-[0.04em] text-foreground outline-none placeholder:text-muted-foreground"
         />
       </div>
 
@@ -178,20 +180,21 @@ export default function Startpage({
             id={category.id}
             className="mb-10 scroll-mt-20"
           >
-            <div className="mb-3 flex items-baseline gap-2">
-              <h2 className="m-0 text-sm font-semibold  text-muted-foreground">
+            <div className="mb-3 flex items-center gap-3">
+              <h2 className="label-brut m-0 text-foreground">
                 {category.name}
               </h2>
               {category.visibility === 'auth' ? (
-                <Badge variant="secondary">private</Badge>
+                <Badge variant="secondary">Private</Badge>
               ) : null}
+              <span aria-hidden className="h-[2px] flex-1 bg-foreground" />
             </div>
             {category.apps.length === 0 && category.emptyMessage ? (
               <p className="text-sm text-muted-foreground">
                 {category.emptyMessage}
               </p>
             ) : (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                 {category.apps.map((app) => {
                   const matched = matchedIds.includes(app.id)
                   const label = highlights[app.id] ?? app.name

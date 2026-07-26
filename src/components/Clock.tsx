@@ -36,16 +36,27 @@ export default function Clock() {
   }, [])
 
   return (
-    <div className="mb-6 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-      <h1 className="m-0 text-xl font-semibold tracking-tight">
-        {now ? greetingForHour(now.getHours()) : '\u00a0'}
-      </h1>
-      <p className="m-0 text-sm text-muted-foreground">
+    <div className="relative mb-8 pb-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+        <h1 className="m-0 text-3xl font-bold tracking-[-0.03em] sm:text-4xl">
+          {now ? greetingForHour(now.getHours()) : '\u00a0'}
+        </h1>
+        <p className="m-0 font-mono text-3xl leading-none font-bold tabular-nums sm:text-4xl">
+          {now ? formatTime(now) : '\u00a0'}
+        </p>
+      </div>
+      <p className="label-brut m-0 mt-2 text-[0.7rem] text-muted-foreground">
         {now ? formatDate(now) : '\u00a0'}
       </p>
-      <p className="m-0 font-mono text-sm text-muted-foreground">
-        {now ? formatTime(now) : '\u00a0'}
-      </p>
+      {/* Black rule with an accent segment \u2014 the one non-monochrome mark up top. */}
+      <span
+        aria-hidden
+        className="absolute bottom-0 left-0 h-[3px] w-full bg-foreground"
+      />
+      <span
+        aria-hidden
+        className="absolute bottom-0 left-0 h-[3px] w-24 bg-stroke"
+      />
     </div>
   )
 }
