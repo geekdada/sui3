@@ -48,6 +48,7 @@
   /* Outermost container edge — see --border-outer. */
   --color-border-outer: var(--border-outer);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -103,7 +104,14 @@
   --muted-foreground: oklch(0.44 0 0);
   --accent: oklch(0 0 0);
   --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0 0 0);
+  /*
+   * The second reserved hue after --stroke, and the only red in the system:
+   * irreversible actions only (disconnect, delete). Error *states* keep the
+   * monochrome hazard-bar treatment below, so red never becomes ambient and
+   * stays legible as "this destroys something".
+   */
+  --destructive: oklch(0.47 0.19 27);
+  --destructive-foreground: oklch(1 0 0);
   --border: oklch(0 0 0);
   --input: oklch(0 0 0);
   --ring: var(--stroke);
@@ -136,48 +144,71 @@
 
   /*
    * Outermost container edge only: dimmed 40% toward the background so the
-   * top-level frame recedes behind the inner content. Declared once — the
-   * var() references resolve per element, so `.dark` inverts it automatically.
+   * top-level frame recedes behind the inner content. Derived from --border,
+   * not --foreground, so it stays *below* the resting hairline in both themes
+   * — in dark, --border is deliberately well short of --foreground.
+   *
+   * Declared once: `.dark` lands on <html>, which is also :root, so the var()
+   * references here resolve against the dark values automatically.
    */
-  --border-outer: color-mix(in oklch, var(--foreground) 60%, var(--background));
+  --border-outer: color-mix(in oklch, var(--border) 60%, var(--background));
+
+  /* Fill for the hard offset shadows. See the shadow-brut utilities below. */
+  --shadow-brut-color: var(--foreground);
 }
 
+/*
+ * Dark is a counterpart to the light palette, not a polarity flip of it: same
+ * warm hue family, inverted lightness. Only the values that genuinely differ
+ * are listed — every :root token written as a var() formula (--card, --popover,
+ * --sidebar, --sidebar-accent, --ring, --header-bg, --border-outer) re-resolves
+ * here on its own, because `.dark` lands on <html>, which is also :root.
+ */
 .dark {
-  --background: oklch(0 0 0);
-  --foreground: oklch(1 0 0);
-  --card: oklch(0 0 0);
-  --card-foreground: oklch(1 0 0);
-  --popover: oklch(0 0 0);
-  --popover-foreground: oklch(1 0 0);
-  --primary: oklch(1 0 0);
-  --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.19 0 0);
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.17 0 0);
-  --muted-foreground: oklch(0.72 0 0);
-  --accent: oklch(1 0 0);
-  --accent-foreground: oklch(0 0 0);
-  --destructive: oklch(1 0 0);
-  --border: oklch(1 0 0);
-  --input: oklch(1 0 0);
-  --ring: var(--stroke);
-  --chart-1: oklch(1 0 0);
-  --chart-2: oklch(0.8 0 0);
-  --chart-3: oklch(0.6 0 0);
-  --chart-4: oklch(0.4 0 0);
-  --chart-5: oklch(0.25 0 0);
-  --sidebar: oklch(0 0 0);
-  --sidebar-foreground: oklch(1 0 0);
-  --sidebar-primary: oklch(1 0 0);
-  --sidebar-primary-foreground: oklch(0 0 0);
-  --sidebar-accent: oklch(0.17 0 0);
-  --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(1 0 0);
-  --sidebar-ring: var(--stroke);
+  --background: oklch(0.185 0.012 60);
+  /* The light theme's paper, reused as the dark theme's ink. */
+  --foreground: oklch(0.955 0.014 74);
+  --card-foreground: var(--foreground);
+  --popover-foreground: var(--foreground);
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  /*
+   * The same translucent-ink trick as :root, inverted: a low-alpha warm light
+   * lifts off the charcoal the way low-alpha orange sinks into the cream. Still
+   * oklab, not oklch, for the same powerless-hue reason.
+   */
+  --secondary: color-mix(in oklab, var(--stroke) 16%, transparent);
+  --secondary-foreground: var(--foreground);
+  --muted: color-mix(in oklab, var(--stroke) 8%, transparent);
+  --muted-foreground: oklch(0.705 0.016 66);
+  --accent: var(--foreground);
+  --accent-foreground: var(--background);
+  /* Lifted just enough to hold the charcoal without halating; same hue. */
+  --destructive: oklch(0.5 0.185 27);
+  /*
+   * Resting hairlines stop well short of --foreground. Black on cream and white
+   * on black measure about the same contrast, but the light-on-dark direction
+   * halates, so a literal inversion reads as glare rather than structure —
+   * badly so in the admin, which frames nearly every control. ~4.7:1 keeps the
+   * brutalist grid legible without the burn.
+   */
+  --border: oklch(0.6 0.02 62);
+  --input: var(--border);
+  --sidebar-border: var(--border);
+  /* Dimmer still: a 4px block covers far more area than a 1px line. */
+  --shadow-brut-color: oklch(0.5 0.018 62);
+  --chart-1: oklch(0.955 0.014 74);
+  --chart-2: oklch(0.8 0.016 68);
+  --chart-3: oklch(0.62 0.018 64);
+  --chart-4: oklch(0.45 0.016 62);
+  --chart-5: oklch(0.3 0.014 60);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--foreground);
+  --sidebar-primary-foreground: var(--background);
+  --sidebar-accent-foreground: var(--foreground);
 
   /* App-only tokens */
-  --match: oklch(1 0 0);
-  --header-bg: oklch(0 0 0 / 0.92);
+  --match: var(--foreground);
 }
 
 /*
@@ -185,11 +216,11 @@
  * cue now that corners and gradients are gone.
  */
 @utility shadow-brut {
-  box-shadow: 4px 4px 0 0 var(--foreground);
+  box-shadow: 4px 4px 0 0 var(--shadow-brut-color);
 }
 
 @utility shadow-brut-sm {
-  box-shadow: 2px 2px 0 0 var(--foreground);
+  box-shadow: 2px 2px 0 0 var(--shadow-brut-color);
 }
 
 @utility shadow-brut-stroke {
