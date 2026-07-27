@@ -24,7 +24,7 @@ const emptyApp: AppFormValues = { name: '', url: '', icon: '' }
 
 const inputBaseClass = 'h-8 px-2.5 py-1 text-sm'
 const iconBtnClass =
-  'inline-flex shrink-0 items-center justify-center border-1 border-foreground bg-card p-1.5 text-foreground transition-shadow hover:shadow-brut-stroke-sm'
+  'inline-flex shrink-0 items-center justify-center border-1 border-border bg-card p-1.5 text-foreground transition-shadow hover:shadow-brut-stroke-sm'
 
 export default function SortableCategory({
   category,
@@ -136,7 +136,7 @@ export default function SortableCategory({
             }
           }}
           aria-label="Category name"
-          className="label-brut min-w-0 flex-1 border-1 border-transparent bg-transparent px-1 py-0.5 text-foreground outline-none hover:border-foreground focus-visible:border-foreground focus-visible:ring-3 focus-visible:ring-ring"
+          className="label-brut min-w-0 flex-1 border-1 border-transparent bg-transparent px-1 py-0.5 text-foreground outline-none hover:border-border focus-visible:border-border focus-visible:ring-3 focus-visible:ring-ring"
         />
         <ToggleGroup
           value={[visibility]}
@@ -157,7 +157,9 @@ export default function SortableCategory({
           onClick={() => onDelete(category)}
           className={cn(
             iconBtnClass,
-            'hover:bg-foreground hover:text-background'
+            // Red on hover only: one of these sits on every row, so an
+            // always-red trash icon would make the warning ambient.
+            'hover:border-foreground hover:bg-destructive hover:text-destructive-foreground'
           )}
           aria-label="Delete category"
         >
@@ -257,7 +259,7 @@ export default function SortableCategory({
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="label-brut mt-2 flex w-full items-center gap-1.5 border-1 border-dashed border-foreground px-2 py-1.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className="label-brut mt-2 flex w-full items-center gap-1.5 border-1 border-dashed border-border px-2 py-1.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             <FeatherIcon name="Plus" size={15} />
             Add app
