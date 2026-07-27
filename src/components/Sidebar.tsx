@@ -14,7 +14,7 @@ import FeatherIcon from './FeatherIcon'
 const ALL = 'all'
 
 const navLinkClass =
-  'label-brut flex items-center gap-2 border-1 border-foreground px-2.5 py-1.5 text-xs no-underline transition-shadow hover:shadow-brut-stroke-sm'
+  'label-brut flex items-center gap-2 border-1 border-border px-2.5 py-1.5 text-xs no-underline transition-shadow hover:shadow-brut-stroke-sm'
 const navLinkActiveProps = {
   className: 'bg-foreground text-background',
 }
@@ -221,7 +221,7 @@ export default function Sidebar({
       >
         <DrawerTrigger
           aria-label="Open navigation"
-          className="shadow-brut-stroke fixed bottom-5 left-4 z-40 flex size-11 items-center justify-center border-1 border-foreground bg-background text-foreground transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none md:hidden"
+          className="shadow-brut-stroke fixed bottom-5 left-4 z-40 flex size-11 items-center justify-center border-1 border-border bg-background text-foreground transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none md:hidden"
         >
           <FeatherIcon name="Menu" size={18} />
         </DrawerTrigger>
