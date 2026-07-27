@@ -82,7 +82,7 @@ function LoginPage() {
           <button
             type="button"
             disabled={busy}
-            className="mt-3 flex w-full items-center justify-center gap-1.5 border-1 border-dashed border-foreground px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40"
+            className="mt-3 flex w-full items-center justify-center gap-1.5 border-1 border-dashed border-border px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40"
             onClick={() =>
               runLogin(async () => {
                 await devLoginFn()

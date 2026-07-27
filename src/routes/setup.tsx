@@ -66,7 +66,7 @@ function SetupPage() {
             type="password"
             value={setupToken}
             onChange={(e) => setSetupToken(e.target.value)}
-            className="w-full border-1 border-foreground bg-card px-3 py-2 font-mono outline-none focus-visible:ring-3 focus-visible:ring-ring"
+            className="w-full border-1 border-border bg-card px-3 py-2 font-mono outline-none focus-visible:ring-3 focus-visible:ring-ring"
             required
             autoComplete="off"
           />
