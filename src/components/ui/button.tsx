@@ -16,8 +16,13 @@ const buttonVariants = cva(
           'border-border bg-secondary text-secondary-foreground hover:shadow-brut-stroke-sm aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
         ghost:
           'hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground',
+        /*
+         * Filled, like `default`, so the weight matches the consequence — an
+         * outline read as a peer of "Refresh now". The hover block is ink
+         * rather than --stroke: amber sitting against red muddies both.
+         */
         destructive:
-          'border-foreground bg-background text-foreground hover:bg-foreground hover:text-background hover:shadow-brut-stroke-sm',
+          'border-foreground bg-destructive text-destructive-foreground hover:shadow-brut-sm',
         link: 'text-primary underline decoration-2 decoration-stroke underline-offset-4 hover:decoration-foreground',
       },
       size: {
