@@ -1,7 +1,17 @@
 import { base64ToBytes, bytesToBase64 } from '#/lib/base64'
 
 const IV_BYTES = 12
-const AAD = new TextEncoder().encode('sui3:tailscale-oauth:v1')
+
+export type CredentialContext = {
+  aad: string
+  decryptError: string
+}
+
+const TAILSCALE_CONTEXT: CredentialContext = {
+  aad: 'sui3:tailscale-oauth:v1',
+  decryptError:
+    'Unable to decrypt the stored credential. Re-enter the Tailscale OAuth secret.',
+}
 
 export type EncryptedCredential = {
   ciphertext: string
@@ -33,11 +43,16 @@ async function importEncryptionKey(base64Key: string): Promise<CryptoKey> {
 export async function encryptCredential(
   plaintext: string,
   base64Key: string,
+  context: CredentialContext = TAILSCALE_CONTEXT,
 ): Promise<EncryptedCredential> {
   const key = await importEncryptionKey(base64Key)
   const iv = crypto.getRandomValues(new Uint8Array(IV_BYTES))
   const encrypted = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv, additionalData: AAD },
+    {
+      name: 'AES-GCM',
+      iv,
+      additionalData: new TextEncoder().encode(context.aad),
+    },
     key,
     new TextEncoder().encode(plaintext),
   )
@@ -50,6 +65,7 @@ export async function encryptCredential(
 export async function decryptCredential(
   encrypted: EncryptedCredential,
   base64Key: string,
+  context: CredentialContext = TAILSCALE_CONTEXT,
 ): Promise<string> {
   const key = await importEncryptionKey(base64Key)
   try {
@@ -57,15 +73,13 @@ export async function decryptCredential(
       {
         name: 'AES-GCM',
         iv: ownedBuffer(base64ToBytes(encrypted.iv)),
-        additionalData: AAD,
+        additionalData: new TextEncoder().encode(context.aad),
       },
       key,
       ownedBuffer(base64ToBytes(encrypted.ciphertext)),
     )
     return new TextDecoder().decode(plaintext)
   } catch {
-    throw new Error(
-      'Unable to decrypt the stored credential. Re-enter the Tailscale OAuth secret.',
-    )
+    throw new Error(context.decryptError)
   }
 }

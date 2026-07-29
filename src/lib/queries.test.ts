@@ -28,6 +28,11 @@ vi.mock('#/lib/tailscale.functions', () => ({
   getTailscaleSettingsFn: vi.fn(),
 }))
 
+vi.mock('#/lib/trmnl.functions', () => ({
+  getTrmnlDisplayStateFn: vi.fn(),
+  getTrmnlSettingsFn: vi.fn(),
+}))
+
 describe('startpage query options', () => {
   afterEach(() => {
     focusManager.setFocused(undefined)
