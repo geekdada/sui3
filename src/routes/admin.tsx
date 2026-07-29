@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import AdminEditor from '#/components/admin/AdminEditor'
 import ImportPanel from '#/components/admin/ImportPanel'
 import TailscaleSettingsPanel from '#/components/admin/TailscaleSettingsPanel'
+import TrmnlSettingsPanel from '#/components/admin/TrmnlSettingsPanel'
 import FeatherIcon from '#/components/FeatherIcon'
 import Sidebar from '#/components/Sidebar'
 import { Alert, AlertDescription } from '#/components/ui/alert'
@@ -12,6 +13,7 @@ import {
   authStatusQueryOptions,
   isAuthError,
   tailscaleSettingsQueryOptions,
+  trmnlSettingsQueryOptions,
 } from '#/lib/queries'
 
 export const Route = createFileRoute('/admin')({
@@ -23,6 +25,7 @@ export const Route = createFileRoute('/admin')({
     await Promise.all([
       context.queryClient.ensureQueryData(adminDataQueryOptions()),
       context.queryClient.ensureQueryData(tailscaleSettingsQueryOptions()),
+      context.queryClient.ensureQueryData(trmnlSettingsQueryOptions()),
     ])
   },
   component: AdminPage,
@@ -32,14 +35,17 @@ function AdminPage() {
   const navigate = useNavigate()
   const adminQuery = useQuery(adminDataQueryOptions())
   const tailscaleQuery = useQuery(tailscaleSettingsQueryOptions())
+  const trmnlQuery = useQuery(trmnlSettingsQueryOptions())
   const sessionExpired =
-    isAuthError(adminQuery.error) || isAuthError(tailscaleQuery.error)
+    isAuthError(adminQuery.error) ||
+    isAuthError(tailscaleQuery.error) ||
+    isAuthError(trmnlQuery.error)
 
   useEffect(() => {
     if (sessionExpired) void navigate({ to: '/login' })
   }, [sessionExpired, navigate])
 
-  const loadError = adminQuery.error ?? tailscaleQuery.error
+  const loadError = adminQuery.error ?? tailscaleQuery.error ?? trmnlQuery.error
   const categories = adminQuery.data?.categories ?? []
   return (
     <div className="flex">
@@ -67,6 +73,9 @@ function AdminPage() {
         <AdminEditor categories={categories} />
         {tailscaleQuery.data ? (
           <TailscaleSettingsPanel settings={tailscaleQuery.data} />
+        ) : null}
+        {trmnlQuery.data ? (
+          <TrmnlSettingsPanel settings={trmnlQuery.data} />
         ) : null}
         <ImportPanel />
       </main>

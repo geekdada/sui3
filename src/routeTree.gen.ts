@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiStartpageRouteImport } from './routes/api/startpage'
+import { Route as ApiTrmnlDisplayRouteImport } from './routes/api/trmnl/display'
 import { Route as ApiIconNameRouteImport } from './routes/api/icon.$name'
 
 const SetupRoute = SetupRouteImport.update({
@@ -41,6 +42,11 @@ const ApiStartpageRoute = ApiStartpageRouteImport.update({
   path: '/api/startpage',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTrmnlDisplayRoute = ApiTrmnlDisplayRouteImport.update({
+  id: '/api/trmnl/display',
+  path: '/api/trmnl/display',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiIconNameRoute = ApiIconNameRouteImport.update({
   id: '/api/icon/$name',
   path: '/api/icon/$name',
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/setup': typeof SetupRoute
   '/api/startpage': typeof ApiStartpageRoute
   '/api/icon/$name': typeof ApiIconNameRoute
+  '/api/trmnl/display': typeof ApiTrmnlDisplayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/setup': typeof SetupRoute
   '/api/startpage': typeof ApiStartpageRoute
   '/api/icon/$name': typeof ApiIconNameRoute
+  '/api/trmnl/display': typeof ApiTrmnlDisplayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,14 +79,27 @@ export interface FileRoutesById {
   '/setup': typeof SetupRoute
   '/api/startpage': typeof ApiStartpageRoute
   '/api/icon/$name': typeof ApiIconNameRoute
+  '/api/trmnl/display': typeof ApiTrmnlDisplayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/admin' | '/login' | '/setup' | '/api/startpage' | '/api/icon/$name'
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/setup'
+    | '/api/startpage'
+    | '/api/icon/$name'
+    | '/api/trmnl/display'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/admin' | '/login' | '/setup' | '/api/startpage' | '/api/icon/$name'
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/setup'
+    | '/api/startpage'
+    | '/api/icon/$name'
+    | '/api/trmnl/display'
   id:
     | '__root__'
     | '/'
@@ -87,6 +108,7 @@ export interface FileRouteTypes {
     | '/setup'
     | '/api/startpage'
     | '/api/icon/$name'
+    | '/api/trmnl/display'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -96,6 +118,7 @@ export interface RootRouteChildren {
   SetupRoute: typeof SetupRoute
   ApiStartpageRoute: typeof ApiStartpageRoute
   ApiIconNameRoute: typeof ApiIconNameRoute
+  ApiTrmnlDisplayRoute: typeof ApiTrmnlDisplayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -135,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStartpageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/trmnl/display': {
+      id: '/api/trmnl/display'
+      path: '/api/trmnl/display'
+      fullPath: '/api/trmnl/display'
+      preLoaderRoute: typeof ApiTrmnlDisplayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/icon/$name': {
       id: '/api/icon/$name'
       path: '/api/icon/$name'
@@ -152,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   SetupRoute: SetupRoute,
   ApiStartpageRoute: ApiStartpageRoute,
   ApiIconNameRoute: ApiIconNameRoute,
+  ApiTrmnlDisplayRoute: ApiTrmnlDisplayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

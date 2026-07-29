@@ -62,7 +62,7 @@ Local: `.dev.vars` (gitignored). Production: Wrangler secrets/vars.
 | `WEBAUTHN_RP_ID` | yes | e.g. `localhost` or `sui3.example.com` |
 | `WEBAUTHN_ORIGIN` | yes | e.g. `http://localhost:8333` or `https://sui3.example.com` |
 | `ACCESS_TOKEN_TTL_DAYS` | no | Default `90` |
-| `CREDENTIAL_ENCRYPTION_KEY` | for Tailscale | Base64-encoded 32-byte key for encrypting OAuth credentials in D1 |
+| `CREDENTIAL_ENCRYPTION_KEY` | for Tailscale + TRMNL | Base64-encoded 32-byte key for encrypting OAuth credentials in D1 |
 
 ## Auth flow
 
@@ -82,6 +82,18 @@ via `issueAccessToken()` without a WebAuthn ceremony and works before any passke
 - Unauthenticated: only `visibility = public` categories
 - Authenticated: all categories
 - Admin import accepts sui2 `data.json`; **only `apps`**; overwrites all categories/apps; imported categories default to `auth`
+
+## TRMNL
+
+Singleton `trmnl_integration` row (`migrations/0003`, `0004`); image cached as a D1 BLOB and
+refreshed in the background. Needs `CREDENTIAL_ENCRYPTION_KEY`. Two modes (`mode` column):
+
+- `mirror` (default) — `GET /api/display/current`. Read-only; shows what a physical device shows.
+- `device` — `GET /api/display`. SUI3 is the device; **each call advances its own playlist**. Only
+  `Access-Token` is sent — no device telemetry headers.
+
+"Save and test" always validates via `/api/display/current` so it never burns a playlist slot;
+scheduled refreshes and "Refresh now" use the mode's endpoint.
 
 ## Scripts
 
