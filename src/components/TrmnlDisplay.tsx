@@ -43,7 +43,7 @@ export default function TrmnlDisplay() {
     if (!configured || !expiresAt) return
     const delay = Math.max(
       expiresAt * 1000 - Date.now() + EXPIRY_BUFFER_MS,
-      EXPIRY_BUFFER_MS,
+      EXPIRY_BUFFER_MS
     )
     const id = window.setTimeout(() => {
       void queryClient.invalidateQueries({ queryKey: ['trmnl', 'display'] })
@@ -56,17 +56,15 @@ export default function TrmnlDisplay() {
   return (
     <div className="mb-8">
       {fetchedAt !== null ? (
-        <div className="relative inline-block max-w-full">
+        <div className="relative inline-block max-w-full border-1 border-border">
           <img
             key={fetchedAt}
             src={`/api/trmnl/display?v=${fetchedAt}`}
             alt="TRMNL screen"
-            // The screen is 1-bit black-on-white, so a straight inversion is
-            // enough to keep it from glaring in dark mode.
-            // Never upscale past the panel's native 800x480 — an e-ink screen
-            // stretched wide just looks like a rendering bug. Same 5/3 panel the
-            // loading placeholder below assumes.
-            className="block h-auto max-w-[min(100%,800px)] border-1 border-border dark:invert"
+            // The screen is 1-bit black-on-white, so a straight inversion keeps
+            // it from glaring in dark mode. Capped at the panel's native
+            // 800x480 — the same 5/3 the loading placeholder below assumes.
+            className="block h-auto max-w-[min(100%,800px)] dark:invert"
           />
           {expired ? (
             <span className="absolute top-2 left-2 flex items-center gap-1.5 bg-background/90 px-2 py-1 font-mono text-[0.65rem] tracking-[0.08em] text-foreground uppercase">
