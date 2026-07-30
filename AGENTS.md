@@ -93,7 +93,8 @@ refreshed in the background. Needs `CREDENTIAL_ENCRYPTION_KEY`. Two modes (`mode
   `Access-Token` is sent — no device telemetry headers.
 
 "Save and test" always validates via `/api/display/current` so it never burns a playlist slot;
-scheduled refreshes and "Refresh now" use the mode's endpoint.
+scheduled refreshes and the force-refresh button ("Refresh now", "Advance now" in device mode)
+use the mode's endpoint.
 
 ## Scripts
 
