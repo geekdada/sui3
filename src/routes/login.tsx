@@ -65,7 +65,7 @@ function LoginPage() {
       <button
         type="button"
         disabled={busy}
-        className="mt-6 border-1 border-foreground bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-shadow hover:shadow-brut-stroke active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-40"
+        className="mt-6 border border-foreground bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-shadow hover:shadow-brut-stroke active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-40"
         onClick={() =>
           runLogin(async () => {
             const { options, challengeId } = await beginLoginFn()
@@ -77,12 +77,12 @@ function LoginPage() {
         {busy ? 'Waiting for passkey…' : 'Continue with passkey'}
       </button>
       {import.meta.env.DEV ? (
-        <div className="mt-8 border-t-1 border-dashed border-border pt-6">
+        <div className="mt-8 border-t border-dashed pt-6">
           <p className="label-brut text-xs text-muted-foreground">Dev only</p>
           <button
             type="button"
             disabled={busy}
-            className="mt-3 flex w-full items-center justify-center gap-1.5 border-1 border-dashed border-border px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40"
+            className="mt-3 flex w-full items-center justify-center gap-1.5 border border-dashed px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40"
             onClick={() =>
               runLogin(async () => {
                 await devLoginFn()

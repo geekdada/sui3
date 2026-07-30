@@ -237,8 +237,14 @@
 }
 
 @layer base {
+  /*
+   * Border colour defaults to --border everywhere, so `border` alone is enough
+   * — only name a colour when overriding it (--border-outer, --foreground, or
+   * revealing a border that starts out transparent).
+   */
   * {
-    @apply border-border outline-ring;
+    border-color: var(--border);
+    outline-color: var(--ring);
   }
 
   html {

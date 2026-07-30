@@ -151,7 +151,7 @@ export default function Startpage({
 
   return (
     <div>
-      <div className="mb-8 flex max-w-md items-stretch border-1 border-border bg-card focus-within:ring-3 focus-within:ring-ring">
+      <div className="mb-8 flex max-w-md items-stretch border bg-card focus-within:ring-3 focus-within:ring-ring">
         <span
           aria-hidden
           className="flex w-10 shrink-0 items-center justify-center bg-foreground text-background"

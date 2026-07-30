@@ -22,10 +22,10 @@ export default function Header({
 
   return (
     <header className="sticky top-0 z-50 bg-header-bg backdrop-blur">
-      <nav className="flex h-14 items-center gap-3 border-b-1 border-border px-4 sm:px-6">
+      <nav className="flex h-14 items-center gap-3 border-b px-4 sm:px-6">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 border-1 border-foreground bg-foreground px-2.5 py-1 font-mono text-sm font-bold tracking-[0.14em] text-background no-underline transition-shadow hover:shadow-brut-stroke-sm"
+          className="inline-flex items-center gap-2 border border-foreground bg-foreground px-2.5 py-1 font-mono text-sm font-bold tracking-[0.14em] text-background no-underline transition-shadow hover:shadow-brut-stroke-sm"
         >
           <FeatherIcon name="Grid" size={15} />
           SUI3

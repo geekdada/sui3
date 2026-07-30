@@ -66,7 +66,7 @@ function SetupPage() {
             type="password"
             value={setupToken}
             onChange={(e) => setSetupToken(e.target.value)}
-            className="w-full border-1 border-border bg-card px-3 py-2 font-mono outline-none focus-visible:ring-3 focus-visible:ring-ring"
+            className="w-full border bg-card px-3 py-2 font-mono outline-none focus-visible:ring-3 focus-visible:ring-ring"
             required
             autoComplete="off"
           />
@@ -79,7 +79,7 @@ function SetupPage() {
         <button
           type="submit"
           disabled={busy}
-          className="border-1 border-foreground bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-shadow hover:shadow-brut-stroke active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-40"
+          className="border border-foreground bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-shadow hover:shadow-brut-stroke active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-40"
         >
           {busy ? 'Enrolling…' : 'Enroll passkey'}
         </button>

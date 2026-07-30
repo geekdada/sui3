@@ -22,7 +22,7 @@ export default function AppCard({
         target="_blank"
         rel="noreferrer"
         className={cn(
-          'app-card flex min-w-0 flex-1 flex-col gap-2 border-1 border-border bg-card p-3 text-foreground no-underline transition-[box-shadow,transform,background-color] duration-75 focus-visible:ring-3 focus-visible:ring-ring group-hover:-translate-x-[2px] group-hover:-translate-y-[2px] group-hover:shadow-brut',
+          'app-card flex min-w-0 flex-1 flex-col gap-2 border bg-card p-3 text-foreground no-underline transition-[box-shadow,transform,background-color] duration-75 focus-visible:ring-3 focus-visible:ring-ring group-hover:-translate-x-[2px] group-hover:-translate-y-[2px] group-hover:shadow-brut',
           matched && 'matched'
         )}
       >

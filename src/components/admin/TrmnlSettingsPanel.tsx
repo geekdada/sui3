@@ -143,7 +143,7 @@ export default function TrmnlSettingsPanel({
   const isDeviceMode = settings.mode === 'device'
 
   return (
-    <section className="mt-10 border-t-1 border-border pt-6">
+    <section className="mt-10 border-t pt-6">
       <div className="mb-4">
         <h2 className="label-brut m-0 text-sm text-foreground">TRMNL</h2>
         <p className="mt-1 text-sm text-muted-foreground">

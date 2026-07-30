@@ -118,7 +118,7 @@ export default function TrmnlDisplay() {
     <div className="mb-8">
       {fetchedAt !== null ? (
         <>
-          <div className="relative w-full max-w-[800px] border-1 border-border">
+          <div className="relative w-full max-w-[800px] border ">
             <img
               key={fetchedAt}
               ref={imgRef}
@@ -193,7 +193,7 @@ export default function TrmnlDisplay() {
           </Popover>
         </>
       ) : (
-        <div className="flex aspect-[5/3] w-full max-w-md items-center justify-center gap-2 border-1 border-border bg-card text-sm text-muted-foreground">
+        <div className="flex aspect-[5/3] w-full max-w-md items-center justify-center gap-2 border bg-card text-sm text-muted-foreground">
           <Spinner size={14} data-icon="inline-start" />
           Refreshing screen…
         </div>

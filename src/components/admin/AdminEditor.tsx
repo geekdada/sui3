@@ -48,7 +48,7 @@ import FeatherIcon from '../FeatherIcon'
 import SortableCategory from './SortableCategory'
 
 const inputClass =
-  'border-1 border-border bg-card px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring'
+  'border bg-card px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring'
 
 export default function AdminEditor({
   categories,
@@ -429,11 +429,11 @@ export default function AdminEditor({
 
         <DragOverlay>
           {activeCategory ? (
-            <div className="label-brut shadow-brut-stroke border-1 border-border bg-card px-3 py-2 text-sm text-foreground">
+            <div className="label-brut shadow-brut-stroke border bg-card px-3 py-2 text-sm text-foreground">
               {activeCategory.name}
             </div>
           ) : activeApp ? (
-            <div className="shadow-brut-stroke flex items-center gap-2 border-1 border-border bg-card px-2 py-1.5">
+            <div className="shadow-brut-stroke flex items-center gap-2 border bg-card px-2 py-1.5">
               <AppIcon
                 icon={activeApp.icon}
                 className="text-muted-foreground"
@@ -479,14 +479,14 @@ export default function AdminEditor({
             <button
               type="button"
               onClick={addCategory}
-              className="label-brut border-1 border-border bg-card px-2.5 py-2 text-xs text-foreground transition-shadow hover:shadow-brut-stroke-sm"
+              className="label-brut border bg-card px-2.5 py-2 text-xs text-foreground transition-shadow hover:shadow-brut-stroke-sm"
             >
               Add
             </button>
             <button
               type="button"
               onClick={() => setAddingCat(false)}
-              className="label-brut border-1 border-border bg-card px-2.5 py-2 text-xs text-foreground transition-shadow hover:shadow-brut-stroke-sm"
+              className="label-brut border bg-card px-2.5 py-2 text-xs text-foreground transition-shadow hover:shadow-brut-stroke-sm"
             >
               Cancel
             </button>
@@ -495,7 +495,7 @@ export default function AdminEditor({
           <button
             type="button"
             onClick={() => setAddingCat(true)}
-            className="label-brut flex w-full items-center justify-center gap-1.5 border-1 border-dashed border-border px-3 py-2.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className="label-brut flex w-full items-center justify-center gap-1.5 border border-dashed px-3 py-2.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             <FeatherIcon name="Plus" size={15} />
             Add category
