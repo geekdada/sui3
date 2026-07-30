@@ -287,6 +287,7 @@ describe('TRMNL integration persistence and background refresh', () => {
   it('returns an unconfigured state without a stored row', async () => {
     await expect(getTrmnlDisplayState()).resolves.toEqual({
       configured: false,
+      mode: null,
       hasImage: false,
       fetchedAt: null,
       expiresAt: null,
@@ -306,6 +307,7 @@ describe('TRMNL integration persistence and background refresh', () => {
     const state = await getTrmnlDisplayState()
     expect(state).toEqual({
       configured: true,
+      mode: 'mirror',
       hasImage: true,
       fetchedAt: 1_000,
       expiresAt: 1_300,

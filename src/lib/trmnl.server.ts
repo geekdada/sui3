@@ -338,6 +338,7 @@ export async function getTrmnlDisplayState(): Promise<TrmnlDisplayState> {
   if (!row) {
     return {
       configured: false,
+      mode: null,
       hasImage: false,
       fetchedAt: null,
       expiresAt: null,
@@ -352,6 +353,7 @@ export async function getTrmnlDisplayState(): Promise<TrmnlDisplayState> {
   await maybeRefreshInBackground(row, now)
   return {
     configured: true,
+    mode: parseTrmnlMode(row.mode),
     hasImage: row.image !== null,
     fetchedAt: row.fetched_at,
     expiresAt: row.expires_at,
