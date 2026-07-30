@@ -138,6 +138,9 @@ export default function TrmnlSettingsPanel({
   }
 
   const shownError = notice?.kind === 'error' ? notice.text : settings.lastError
+  // The force-refresh acts on the stored mode, so label it from settings, not
+  // the unsaved form toggle.
+  const isDeviceMode = settings.mode === 'device'
 
   return (
     <section className="mt-10 border-t-1 border-border pt-6">
@@ -238,14 +241,16 @@ export default function TrmnlSettingsPanel({
               void run(
                 'refresh',
                 () => forceRefresh(),
-                'TRMNL image refreshed.'
+                isDeviceMode
+                  ? 'TRMNL playlist advanced.'
+                  : 'TRMNL image refreshed.'
               )
             }
           >
             {pending === 'refresh' ? (
               <Spinner data-icon="inline-start" />
             ) : null}
-            Refresh now
+            {isDeviceMode ? 'Advance now' : 'Refresh now'}
           </Button>
           <Button
             type="button"
