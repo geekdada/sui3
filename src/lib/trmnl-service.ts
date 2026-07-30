@@ -63,6 +63,7 @@ export type TrmnlSettingsSummary = {
 
 export type TrmnlDisplayState = {
   configured: boolean
+  mode: TrmnlMode | null
   hasImage: boolean
   fetchedAt: number | null
   expiresAt: number | null
